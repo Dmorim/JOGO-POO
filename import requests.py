@@ -68,7 +68,7 @@ class Province:
 
     def produce_army(self):
         self.army_progress += self.level
-        if self.army_progress >= 5:
+        if self.army_progress >= 8:
             self.current_owner.army_creation(self)
             self.army_progress = 0
 
@@ -92,13 +92,13 @@ class Army:
         return self.health
 
     def get_province(self):
-        return self.province
+        return self.current_province
 
     def heal_army(self, province):
         self.health += province.level * 1.25
 
     def set_province(self, province):
-        self.province = province
+        self.current_province = province
 
 
 class Terrain:
@@ -120,6 +120,7 @@ class Game:
     def __init__(self):
         self.players = []
         self.current_player = None
+        self.mapmode = True
 
     def add_player(self, player):
         self.players.append(player)
@@ -176,7 +177,7 @@ class Game:
     def army_creation(self, player_m):
         for province in player_m.provinces:
             province.produce_army()
-            if player_m.armys != []:
+            if player_m.armys:
                 print(
                     f"Army created in {province.name} with attack {player_m.armys[-1].attack} and defense {player_m.armys[-1].defense}"
                 )
@@ -217,7 +218,7 @@ class Game:
                 print(
                     f"Province: {province.name} (Level: {province.level}) (Terrain: {province.terrain_type.terrain})"
                 )
-                if player.armys != []:
+                if player.armys:
                     armies = [
                         army
                         for army in player.armys
@@ -276,7 +277,7 @@ game.play()
 """
 Checklist:
 Criação de Exércitos	Check
-Criação de Provincias	Check
+Criação de Províncias	Check
 Criação de Jogadores	Check
 Criação de Terrenos     Check
 Geração de Exércitos	Check
@@ -285,5 +286,23 @@ Funçao para melhorar província	Check
 Função para criar exercito em turno    Check
 
 Função para movimentação de tropas
+Função para atacar províncias(Dependente de movimentação de tropas)
+Função para curar exércitos
+Função para inserção dos dados do jogo antes de iniciar
+Encapsulamento de classes em arquivos separados
+Classe para armazenar funções de ação
+Classe para armazenar as informações do jogo antes de começar
+Implementação de AI
+Definição de Mapa para o jogo
 
+
+Organização de prioridades:
+1- Encapsulamento de classes em arquivos separados
+2- Classe para armazenar funções de ação
+3- Classe para armazenar as informações do jogo antes de começar
+4- Definição de Mapa para o jogo
+5- Função para movimentação de tropas
+6- Função para atacar províncias(Dependente de movimentação de tropas)
+7- Função para curar exércitos
+8- Implementação de AI
 """

@@ -171,3 +171,4 @@ class Game:
                                 a_grp.add_army(army)
                                 player_m.armys.remove(army)
         return
+

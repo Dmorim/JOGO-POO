@@ -1,5 +1,6 @@
 import random
 
+
 class Army:
     def __init__(self, current_province, owner, attack=1, defense=1):
         self.attack = round(attack * (random.uniform(0.80, 1.2)), 2)
@@ -7,6 +8,8 @@ class Army:
         self.health = 10
         self.current_province = current_province
         self.owner = owner
+        self.move_points = 0
+        self.in_move = False
 
     def get_attack(self):
         return self.attack
@@ -25,6 +28,9 @@ class Army:
 
     def set_province(self, province):
         self.current_province = province
+    
+    def get_move_points(self):
+        return self.move_points
 
 
 class Army_Group(Army):

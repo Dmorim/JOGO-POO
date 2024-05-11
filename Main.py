@@ -22,51 +22,90 @@ class Main:
         ### Criação de Províncias ###
         # Províncias do Jogador
         def europe_add_provinces(player_m):
-            viena = Province("Viena", player_m, montanha)
-            moscou = Province("Moscou", player_m, tundra)
-            berlim = Province("Berlim", player_m, planice)
-            skopje = Province("Skopje", player_m, floresta)
+            self.viena = Province("Viena", player_m, montanha)
+            self.moscou = Province("Moscou", player_m, tundra)
+            self.berlim = Province("Berlim", player_m, planice)
+            self.skopje = Province("Skopje", player_m, floresta)
 
-            player_m.add_province(viena)
-            player_m.add_province(moscou)
-            player_m.add_province(berlim)
-            player_m.add_province(skopje)
+            player_m.add_province(self.viena)
+            player_m.add_province(self.moscou)
+            player_m.add_province(self.berlim)
+            player_m.add_province(self.skopje)
 
         # Províncias da IA 1
         def africa_add_provinces(player_m):
-            tripoli = Province("Tripoli", player_m, deserto)
-            cairo = Province("Cairo", player_m, deserto)
-            cartum = Province("Cartum", player_m, montanha)
-            kinshasa = Province("Kinshasa", player_m, floresta)
+            self.tripoli = Province("Tripoli", player_m, deserto)
+            self.cairo = Province("Cairo", player_m, deserto)
+            self.cartum = Province("Cartum", player_m, montanha)
+            self.kinshasa = Province("Kinshasa", player_m, floresta)
 
-            player_m.add_province(tripoli)
-            player_m.add_province(cairo)
-            player_m.add_province(cartum)
-            player_m.add_province(kinshasa)
+            player_m.add_province(self.tripoli)
+            player_m.add_province(self.cairo)
+            player_m.add_province(self.cartum)
+            player_m.add_province(self.kinshasa)
 
         # Províncias da IA 2
         def asia_add_provinces(player_m):
-            teera = Province("Teerã", player_m, deserto)
-            pequim = Province("Pequim", player_m, planice)
-            jacarta = Province("Jacarta", player_m, montanha)
-            toquio = Province("Tóquio", player_m, montanha)
+            self.teera = Province("Teerã", player_m, deserto)
+            self.pequim = Province("Pequim", player_m, planice)
+            self.jacarta = Province("Jacarta", player_m, montanha)
+            self.toquio = Province("Tóquio", player_m, montanha)
 
-            player_m.add_province(teera)
-            player_m.add_province(pequim)
-            player_m.add_province(jacarta)
-            player_m.add_province(toquio)
+            player_m.add_province(self.teera)
+            player_m.add_province(self.pequim)
+            player_m.add_province(self.jacarta)
+            player_m.add_province(self.toquio)
 
         # Províncias da IA 3
         def america_add_provinces(player_m):
-            cidade_do_mexico = Province("Cidade do México", player_m, floresta)
-            quito = Province("Quito", player_m, montanha)
-            lima = Province("Lima", player_m, floresta)
-            buenos_aires = Province("Buenos Aires", player_m, planice)
+            self.cidade_do_mexico = Province("Cidade do México", player_m, floresta)
+            self.quito = Province("Quito", player_m, montanha)
+            self.lima = Province("Lima", player_m, floresta)
+            self.buenos_aires = Province("Buenos Aires", player_m, planice)
 
-            player_m.add_province(cidade_do_mexico)
-            player_m.add_province(quito)
-            player_m.add_province(lima)
-            player_m.add_province(buenos_aires)
+            player_m.add_province(self.cidade_do_mexico)
+            player_m.add_province(self.quito)
+            player_m.add_province(self.lima)
+            player_m.add_province(self.buenos_aires)
+
+        def add_neighbors():
+            self.berlim.add_neighbor(self.viena, self.moscou, self.skopje, self.cartum)
+            self.viena.add_neighbor(self.lima, self.skopje, self.berlim)
+            self.moscou.add_neighbor(self.skopje, self.berlim, self.teera)
+            self.skopje.add_neighbor(self.moscou, self.berlim, self.viena, self.cairo)
+            self.lima.add_neighbor(
+                self.viena,
+                self.buenos_aires,
+                self.cidade_do_mexico,
+                self.quito,
+                self.cairo,
+            )
+            self.cidade_do_mexico.add_neighbor(self.lima, self.buenos_aires, self.quito)
+            self.quito.add_neighbor(self.lima, self.cidade_do_mexico, self.buenos_aires)
+            self.buenos_aires.add_neighbor(
+                self.lima, self.cidade_do_mexico, self.quito, self.toquio
+            )
+            self.tripoli.add_neighbor(self.cairo, self.cartum, self.kinshasa)
+            self.cairo.add_neighbor(
+                self.skopje,
+                self.tripoli,
+                self.cartum,
+                self.kinshasa,
+                self.lima,
+                self.teera,
+            )
+            self.cartum.add_neighbor(
+                self.berlim, self.tripoli, self.cairo, self.kinshasa
+            )
+            self.kinshasa.add_neighbor(self.cairo, self.tripoli, self.cartum)
+            self.teera.add_neighbor(
+                self.moscou, self.pequim, self.jacarta, self.toquio, self.cairo
+            )
+            self.pequim.add_neighbor(self.teera, self.jacarta, self.toquio)
+            self.jacarta.add_neighbor(self.teera, self.pequim, self.toquio)
+            self.toquio.add_neighbor(
+                self.teera, self.pequim, self.jacarta, self.buenos_aires
+            )
 
         # Create game
         game = Game()
@@ -87,6 +126,7 @@ class Main:
             elif player.name == "IA 3":
                 america_add_provinces(player)
 
+        add_neighbors()
         # Start game
         game.start()
 

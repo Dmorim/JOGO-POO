@@ -20,12 +20,23 @@ class Player:
     def remove_army(self, army):
         self.armys.remove(army)
 
-    def get_provinces(self):
+    def get_player_province(self):
         return self.provinces
+
+    def get_player_name(self):
+        return self.name
+
+    def get_player_actions(self):
+        return self.actions
+
+    def get_armys(self):
+        return self.armys
 
     def action_move_army(self):
         if self.actions >= 0.75:
             self.actions -= 0.75
+            return True
+        return False
 
     def action_upgrade_province(self, province: object):
         modi = province.terrain_type.terrain_upgrade_modifier

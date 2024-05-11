@@ -53,3 +53,6 @@ class Army_Group(Army):
     def remove_army(self, army):
         self.armys.remove(army)
         return army
+    
+    def get_armys(self):
+        return self.armys

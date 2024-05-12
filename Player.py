@@ -38,8 +38,8 @@ class Player:
             return True
         return False
 
-    def action_upgrade_province(self, province: object):
-        modi = province.terrain_type.terrain_upgrade_modifier
+    def action_upgrade_province(self, province):
+        modi = province.get_terrain().get_upgrade_modifier()
         if self.actions >= round(1.50 * modi, 2):
             self.actions -= round(1.50 * modi, 2)
             return True

@@ -28,9 +28,21 @@ class Army:
 
     def set_province(self, province):
         self.current_province = province
-    
+
     def get_move_points(self):
         return self.move_points
+
+    def set_move_points(self, move_points):
+        self.move_points = move_points
+
+    def group_army(self):
+        return Army_Group(self.current_province, self.owner)
+
+    def get_in_move(self):
+        return self.in_move
+
+    def __str__(self) -> str:
+        return self.name
 
 
 class Army_Group(Army):
@@ -53,6 +65,10 @@ class Army_Group(Army):
     def remove_army(self, army):
         self.armys.remove(army)
         return army
-    
+
     def get_armys(self):
         return self.armys
+
+    def transfer_army(self, army, army_group):
+        army_group.armys.extend(army.get_armys())
+        self.armys = []

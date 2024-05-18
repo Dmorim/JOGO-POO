@@ -18,6 +18,8 @@ class Province:
         if self.army_progress >= 1:
             self.current_owner.army_creation(self)
             self.army_progress = 0
+            return True
+        return False
             
     def add_neighbor(self, *args):
         for neighbor in args:
@@ -37,3 +39,6 @@ class Province:
     
     def get_level(self):
         return self.level
+    
+    def get_owner(self):
+        return self.current_owner

@@ -9,12 +9,21 @@ class Game:
         self.mapmode = True
         self.turn_count = 0
         self.move_on = False
+        self.ongoing_battles = []
+        self.finished_battles = []
 
     def add_player(self, player):
         self.players.append(player)
 
     def remove_player(self, player):
         self.players.remove(player)
+        
+    def add_battle(self, battle):
+        self.ongoing_battles.append(battle)
+    
+    def remove_battle(self, battle):
+        self.ongoing_battles.remove(battle)
+        self.finished_battles.append(battle)
 
     def get_turn_count(self):
         return self.turn_count
@@ -81,14 +90,14 @@ class Game:
 
     def army_move_points(self):
         for army in self.current_player.get_armys():
-            army.move_points = 10
+            army.move_points = 5
             if army.in_move:
                 army.move_points = 0
 
     def army_creation(self, player_m):
         for province in player_m.get_player_province():
-            province.produce_army()
-            if player_m.armys:
+            vax = province.produce_army()
+            if vax:
                 print(
                     f"Exército criado em: {province.name} com {player_m.armys[-1].attack} de ataque e {player_m.armys[-1].defense} de defesa"
                 )
@@ -164,22 +173,23 @@ class Game:
                     ]
                     for army in armies:
                         if isinstance(army, Army_Group):
-                            if army.get_in_move():
-                                print(
-                                    f"Grupo com: {len(army.get_armys())} exércitos. Ataque: {army.get_attack()}, Defesa: {army.get_defense()}, Saúde: {army.get_health()}. ({army.turns_to_move} Turnos para chegar em {army.dest_province.name})"
-                                )
-                            else:
-                                print(
-                                    f"Grupo com: {len(army.get_armys())} exércitos. Ataque: {army.get_attack()}, Defesa: {army.get_defense()}, Saúde: {army.get_health()}."
-                                )
+                            if len(army.get_armys()) > 0:
+                                if army.get_in_move():
+                                    print(
+                                        f"Grupo com: {len(army.get_armys())} exércitos. Ataque: {army.get_attack()}, Defesa: {army.get_defense()}, Saúde: {army.get_health()}. ({army.turns_to_move} Turnos para chegar em {army.dest_province.name})\n"
+                                    )
+                                else:
+                                    print(
+                                        f"Grupo com: {len(army.get_armys())} exércitos. Ataque: {army.get_attack()}, Defesa: {army.get_defense()}, Saúde: {army.get_health()}. Pertencente a: {army.get_owner().get_player_name()}\n"
+                                    )
                         else:
                             if army.get_in_move():
                                 print(
-                                    f"Exército: Ataque: {army.get_attack()}, Defesa: {army.get_defense()}, Saúde: {army.get_health()}. ({army.turns_to_move} Turnos para chegar em {army.dest_province.name})"
+                                    f"Exército: Ataque: {army.get_attack()}, Defesa: {army.get_defense()}, Saúde: {army.get_health()}. ({army.turns_to_move} Turnos para chegar em {army.dest_province.name})\n"
                                 )
                             else:
                                 print(
-                                    f"Exército: Ataque: Ataque: {army.get_attack()}, Defesa: {army.get_defense()}, Saúde: {army.get_health()}. {'(' if army.in_move == True else ''}{army.turns_to_move if army.in_move == True else ''} {'Turnos para chegar em' if army.in_move == True else ''} {army.dest_province.name if army.in_move == True else ''}{')' if army.in_move == True else ''}"
+                                    f"Exército: Ataque: Ataque: {army.get_attack()}, Defesa: {army.get_defense()}, Saúde: {army.get_health()}. Pertencente a: {army.get_owner().get_player_name()}\n"
                                 )
             print()
         print(f"Jogador Atual: {self.current_player.get_player_name()}")
@@ -194,48 +204,42 @@ class Game:
             ]
 
             if len(armies) > 1:
-                print(armies)
+                group = None
                 for army in armies:
                     if isinstance(army, Army_Group):
-                        self.add_army_to_group(player_m)
-                    else:
-                        self.create_group_army(player_m)
-        return
+                        group = army
+                        break
 
-    def create_group_army(self, player_m):
-        for province in player_m.provinces:
-            armies = [
-                army for army in player_m.armys if army.get_province() == province
-            ]
-            if len(armies) > 1:
-                group_army = armies[0].group_army()
-                player_m.armys.append(group_army)
-                for army in armies:
-                    player_m.armys[-1].add_army(army)
-                    player_m.armys.remove(army)
-        return
+                if group is None:
+                    self.create_group_army(player_m, armies)
+                    print("Grupo criado")
 
-    def add_army_to_group(self, player_m):
+                else:
+                    self.add_army_to_group(player_m, armies)
+                    print("Exército adicionado ao grupo")
+
+    def create_group_army(self, player_m, armies):
+        army_group = armies[0].group_army()
+        player_m.armys.append(army_group)
+        for army in armies:
+            army_group.add_army(army)
+            player_m.armys.remove(army)
+
+    def add_army_to_group(self, player_m, armies):
         # Check if there is an existing Army_Group
-        for province in player_m.get_player_province():
-            for army in player_m.get_armys():
-                if isinstance(army, Army_Group):
-                    a_grp = army
-                    if a_grp.get_province() == province:
-                        for army in player_m.armys:
-                            if (
-                                army.get_province() == province
-                                and army not in a_grp.get_armys()
-                                and army != a_grp
-                            ):
-                                # Check if the army is also an Army_Group
-                                if isinstance(army, Army_Group):
-                                    army.transfer_army(army, a_grp)
-                                    player_m.armys.remove(army)
-
-                                else:
-                                    a_grp.add_army(army)
-                                    player_m.armys.remove(army)
+        for army in armies:
+            if isinstance(army, Army_Group):
+                group = army
+                break
+        for army in armies:
+            if army != group:
+                if army not in group.get_armys():
+                    if not isinstance(army, Army_Group):
+                        group.add_army(army)
+                        player_m.armys.remove(army)
+                    else:
+                        army.transfer_army(group)
+                        player_m.armys.remove(army)
         return
 
     def army_movement(self, player_m, selected_army):
@@ -243,6 +247,16 @@ class Game:
             print(
                 f"Exército em movimento para {selected_army.dest_province.get_name()}. Faltam {selected_army.turns_to_move} turnos para chegar."
             )
+            print("Ações disponíveis:\n1 - Cancelar Movimento\n0 - Voltar")
+            action = input()
+            if action == "1":
+                selected_army.in_move = False
+                selected_army.turns_to_move = None
+                selected_army.dest_province = None
+                print("Movimento cancelado.")
+
+            if action == "0":
+                pass
             return
 
         print("Selecione a província de destino do exército:")
@@ -261,9 +275,17 @@ class Game:
     def army_make_movement(self, selected_army, move_to):
         dest_prov = selected_army.get_province().get_neighbors()[int(move_to) - 1]
         move_needed = round(
-            selected_army.get_province().get_move_req()
-            * selected_army.get_province().get_terrain().get_move_modifier()
-            + (dest_prov.get_move_req() * dest_prov.get_terrain().get_move_modifier()),
+            (
+                selected_army.get_province().get_move_req()
+                * selected_army.get_province().get_terrain().get_move_modifier()
+            )
+            + (
+                dest_prov.get_move_req()
+                * dest_prov.get_terrain().get_move_modifier()
+                * 1.75
+                if dest_prov.get_owner() != selected_army.get_owner()
+                else 1
+            ),
             0,
         )
         move_points = selected_army.get_move_points()

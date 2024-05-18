@@ -6,6 +6,7 @@ class Army:
         self.attack = round(attack * (random.uniform(0.80, 1.2)), 2)
         self.defense = round(defense * (random.uniform(0.80, 1.2)), 2)
         self.health = 10
+        self.max_health = 10
         self.current_province = current_province
         self.owner = owner
         self.move_points = 0
@@ -41,14 +42,21 @@ class Army:
     def get_in_move(self):
         return self.in_move
 
-    def __str__(self) -> str:
-        return self.name
+    def get_owner(self):
+        return self.owner
+
+    def get_max_health(self):
+        return self.max_health
+
+    def health_damage(self, damage):
+        self.health -= round(damage, 2)
 
 
 class Army_Group(Army):
     def __init__(self, current_province, owner, attack=1, defense=1):
         super().__init__(current_province, owner, attack, defense)
         self.armys = []
+        self.in_move = False
 
     def add_army(self, army):
         self.armys.append(army)
@@ -69,6 +77,6 @@ class Army_Group(Army):
     def get_armys(self):
         return self.armys
 
-    def transfer_army(self, army, army_group):
-        army_group.armys.extend(army.get_armys())
+    def transfer_army(self, army_group):
+        army_group.armys.extend(self.get_armys())
         self.armys = []

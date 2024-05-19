@@ -149,7 +149,7 @@ Criação do Mapa         Check
 Funçao para melhorar província	Check
 Função para criar exercito em turno    Check
 
-Função para movimentação de tropas
+Função para movimentação de tropas  Check
 Função para atacar províncias(Dependente de movimentação de tropas)
 Função para curar exércitos
 Função para inserção dos dados do jogo antes de iniciar
@@ -161,12 +161,12 @@ Definição de Mapa para o jogo
 
 
 Organização de prioridades:
-1- Encapsulamento de classes em arquivos separados                  Check
-2- Classe para armazenar funções de ação ( Inviável )               Check
-3- Classe para armazenar as informações do jogo antes de começar    Check
-4- Definição de Mapa para o jogo                                    Check
-5- Sistema de aglutinação de exércitos                              Check
-6- Função para movimentação de tropas
+1- Encapsulamento de classes em arquivos separados                      Check
+2- Classe para armazenar funções de ação ( Inviável )                   Check
+3- Classe para armazenar as informações do jogo antes de começar        Check
+4- Definição de Mapa para o jogo                                        Check
+5- Sistema de aglutinação de exércitos                                  Check
+6- Função para movimentação de tropas                                   Check
 7- Função para atacar províncias(Dependente de movimentação de tropas)
 8- Função para curar exércitos
 9- Implementação de AI
@@ -175,13 +175,13 @@ Organização de prioridades:
 
 """
 Sistema de Movimentação de Tropas:
-- O jogador escolhe a província de origem e a província de destino
-- Tropas terão uma quantiade de movimentos por turno
-- Províncias terão um custo de movimentação multiplicado pelo terreno
-- A quantidade de pontos de movimentos necessários para concluír a movimentação será a soma do custo de movimentação da provincia atual para a provincia alvo.
-- Movimentação será permitida entre províncias vizinhas
-- Um exército em movimentação não pode ser unificado com outro
-- Mapa deverá exibir: "Nacionalidade" das tropas, Tropas em movimento, e Provincias vizinhas
+- O jogador escolhe a província de origem e a província de destino  Check
+- Tropas terão uma quantiade de movimentos por turno    Check
+- Províncias terão um custo de movimentação multiplicado pelo terreno   Check
+- A quantidade de pontos de movimentos necessários para concluír a movimentação será a soma do custo de movimentação da provincia atual para a provincia alvo.  Check
+- Movimentação será permitida entre províncias vizinhas Check
+- Um exército em movimentação não pode ser unificado com outro  Check
+- Mapa deverá exibir: "Nacionalidade" das tropas, Tropas em movimento, e Provincias vizinhas    Check
 - As provincias se organizarão da seguinte forma (Provincia - Vizinhos): {
     Berlim - Viena, Moscou, Skopje, Cartum
     Viena - Skopje, Berlim, Lima
@@ -202,8 +202,32 @@ Sistema de Movimentação de Tropas:
     Cidade do México - Lima, Buenos Aires, Quito
     Quito - Lima, Cidade do México, Buenos Aires
     Buenos Aires - Lima, Cidade do México, Quito, Tóquio
-}
-- Haverá um contador exibindo a quantidade de turnos para concluir a movimentação
-- O jogador poderá cancelar a movimentação a qualquer momento de seu turno
-- A pontuação de movimentação de tropas reiniará a cada turno
+}   Check
+- Haverá um contador exibindo a quantidade de turnos para concluir a movimentação   Check
+- O jogador poderá cancelar a movimentação a qualquer momento de seu turno  Check
+- A pontuação de movimentação de tropas reiniará a cada turno   Check
+"""
+
+"""
+Sistema de Ataque de Províncias:
+- Sistema com base em turnos
+- Um exército marcado como atacante e outro como defensor
+- Fatores que irão influenciar na batalha:
+    - Valor de ataque do exército ofensor
+    - Valor de defesa do exército defensor
+    - Terreno da província
+    - Quanto menor a vida da tropa, menor será sua pontuação de ataque e defesa
+    - A pontuação de ataque e defesa terá um multiplicador randômico. O multiplicador terá um intervalo maior para o ataque e menor para a defesa no exército ofensor e vice-versa para o defensor
+    - A quantidade de dano infligida será baseada na diferença entre a pontuação de ataque e defesa
+    - O exército defensor causará dano de retaliação
+    - Uma vez travado em batalha, nenhum dos exércistos poderá tomar outra ação até o fim dela.
+    - Reforços poderão ser enviados para a batalha de ambas as partes
+    - A batalha acabará quando a vida de um dos exércitos chegar a 0. O exército perdedor será eliminado
+    - O exército vencedor terá sua vida reduzida pela quantidade de dano sofrida
+- Ao final da batlha, o exército vencedor poderá ocupar a província
+- A provincia ocupada ficará sem produzir unidades por 3 turnos após a conquista
+- A cura do exército impossibilitará o movimento até o exército estar com a vida cheia ou ser cancelado pelo usuário
+- Batalhas que durarem mais de 10 turnos serão consideradas batalhas épicas e terão seus multiplicadores randômicos potencializados.
+- Avançar em uma provincia não pertencente ao jogador será considerado um ataque
+
 """

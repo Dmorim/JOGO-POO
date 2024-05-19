@@ -50,6 +50,8 @@ class Army:
 
     def health_damage(self, damage):
         self.health -= round(damage, 2)
+        
+        
 
 
 class Army_Group(Army):

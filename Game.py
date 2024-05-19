@@ -17,10 +17,10 @@ class Game:
 
     def remove_player(self, player):
         self.players.remove(player)
-        
+
     def add_battle(self, battle):
         self.ongoing_battles.append(battle)
-    
+
     def remove_battle(self, battle):
         self.ongoing_battles.remove(battle)
         self.finished_battles.append(battle)
@@ -44,6 +44,7 @@ class Game:
             if army.in_move:
                 army.turns_to_move -= 1
                 if army.turns_to_move == 0:
+                        
                     army.in_move = False
                     army.current_province = army.dest_province
                     army.dest_province = None

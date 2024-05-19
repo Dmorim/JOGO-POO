@@ -65,3 +65,7 @@ class Player:
             removed = army_group.remove_army(army)
             if removed is not None:
                 self.add_army(army)
+
+    def battle_start(self):
+        
+        pass

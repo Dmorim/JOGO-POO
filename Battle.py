@@ -11,6 +11,7 @@ class Battle:
         self.turns_count = 0
         self.turns_to_epic = 10
         self.winner = None
+        self.loser = None
 
     def add_off_army(self, army):
         self.off_army.append(army)
@@ -59,7 +60,7 @@ class Battle:
 
     def get_def_army_owner(self):
         return self.def_army_owner
-    
+
     def get_winner(self):
         return self.winner
 
@@ -107,12 +108,14 @@ class Battle:
     def health_check(self):
         if self.get_off_actual_health() <= 0:
             self.winner = self.def_army_owner
+            self.loser = self.off_army_owner
             return True
         elif self.get_def_actual_health() <= 0:
             self.winner = self.off_army_owner
+            self.loser = self.def_army_owner
             return True
         return False
-    
+
     def battle_going(self):
         self.turn_update()
         off_attack_stats = self.get_off_total_attack()
@@ -139,7 +142,7 @@ class Battle:
 
         for army in self.def_army:
             army.health_damage(off_unit_damage)
-            
+
         check = self.health_check()
         if check:
             return True

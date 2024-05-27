@@ -50,8 +50,8 @@ class Player:
             self.actions -= 1
 
     def action_heal_army(self):
-        if self.actions >= 0.25:
-            self.actions -= 0.25
+        if self.actions >= 0.75:
+            self.actions -= 0.75
 
     def can_perform_action(self):
         return self.actions > 0
@@ -65,7 +65,3 @@ class Player:
             removed = army_group.remove_army(army)
             if removed is not None:
                 self.add_army(army)
-
-    def battle_start(self):
-        
-        pass

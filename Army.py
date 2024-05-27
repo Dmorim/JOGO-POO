@@ -11,6 +11,7 @@ class Army:
         self.owner = owner
         self.move_points = 0
         self.in_move = False
+        self.in_healing = False
 
     def get_attack(self):
         return self.attack
@@ -19,13 +20,21 @@ class Army:
         return self.defense
 
     def get_health(self):
-        return self.health
+        return round(self.health, 2)
 
     def get_province(self):
         return self.current_province
 
-    def heal_army(self, province):
-        self.health += province.level * 1.25
+    def heal_army_value(self):
+        healing_value = round(self.get_province().get_level() * 1.25, 2)
+        if healing_value >= self.get_health() / 2:
+            healing_value = self.get_health() / 2
+        if healing_value + self.get_health() >= self.max_health:
+            healing_value = self.max_health - self.get_health()
+        return healing_value
+
+    def heal_army_action(self):
+        self.health += self.heal_army_value()
 
     def set_province(self, province):
         self.current_province = province
@@ -50,8 +59,12 @@ class Army:
 
     def health_damage(self, damage):
         self.health -= round(damage, 2)
-        
-        
+
+    def get_in_healing(self):
+        return self.in_healing
+
+    def set_in_healing(self, healing):
+        self.in_healing = healing
 
 
 class Army_Group(Army):
@@ -70,11 +83,14 @@ class Army_Group(Army):
         return round(sum([army.defense for army in self.armys]), 2)
 
     def get_health(self):
-        return sum([army.health for army in self.armys])
+        return round(sum([army.health for army in self.armys]), 2)
+
+    def get_max_health(self):
+        return round(sum([army.max_health for army in self.armys]), 2)
 
     def remove_army(self, army):
         self.armys.remove(army)
-        return army
+        return
 
     def get_armys(self):
         return self.armys
@@ -82,3 +98,37 @@ class Army_Group(Army):
     def transfer_army(self, army_group):
         army_group.armys.extend(self.get_armys())
         self.armys = []
+
+    def health_damage(self, damage):
+        for army in self.armys:
+            army.health -= round(damage, 2)
+
+    def split_group(self):
+        print("Informe a quantidade de exércitos que deseja dividir: ")
+        quant = int(input())
+        if quant >= len(self.armys):
+            print("Quantidade de exércitos maior que a quantidade atual.")
+            return
+        if quant <= 0:
+            print("Quantidade de exércitos inválida.")
+            return
+        new_group = Army_Group(self.current_province, self.owner)
+        for i in range(quant):
+            new_group.add_army(self.armys.pop())
+
+        return new_group
+
+    def heal_army_value(self):
+        heal_army_value = []
+        for army in self.armys:
+            healing_value = round(self.get_province().get_level() * 1.25, 2)
+            if healing_value >= army.get_health() / 2:
+                healing_value = army.get_health() / 2
+            if healing_value + army.get_health() >= army.max_health:
+                healing_value = army.max_health - army.get_health()
+            heal_army_value.append(healing_value)
+        return heal_army_value
+
+    def heal_army_action(self):
+        for i, army in enumerate(self.armys):
+            army.health += self.heal_army_value()[i]

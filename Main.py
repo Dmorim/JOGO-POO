@@ -14,8 +14,8 @@ class Main:
 
         ### Criação de Terrenos ###
         planice = Terrain("Planice", 1, 1, 1)
-        floresta = Terrain("Floresta", 1.15, 1.20, 1.1)
-        montanha = Terrain("Montanha", 1.8, 1.33, 1.5)
+        floresta = Terrain("Floresta", 1.15, 1.20, 1.5)
+        montanha = Terrain("Montanha", 1.8, 1.33, 1.8)
         tundra = Terrain("Tundra", 1.15, 0.8, 1.1)
         deserto = Terrain("Deserto", 1.2, 1, 1.2)
 
@@ -210,24 +210,39 @@ Sistema de Movimentação de Tropas:
 
 """
 Sistema de Ataque de Províncias:
-- Sistema com base em turnos
-- Um exército marcado como atacante e outro como defensor
-- Fatores que irão influenciar na batalha:
-    - Valor de ataque do exército ofensor
-    - Valor de defesa do exército defensor
-    - Terreno da província
-    - Quanto menor a vida da tropa, menor será sua pontuação de ataque e defesa
-    - A pontuação de ataque e defesa terá um multiplicador randômico. O multiplicador terá um intervalo maior para o ataque e menor para a defesa no exército ofensor e vice-versa para o defensor
-    - A quantidade de dano infligida será baseada na diferença entre a pontuação de ataque e defesa
-    - O exército defensor causará dano de retaliação
-    - Uma vez travado em batalha, nenhum dos exércistos poderá tomar outra ação até o fim dela.
-    - Reforços poderão ser enviados para a batalha de ambas as partes
-    - A batalha acabará quando a vida de um dos exércitos chegar a 0. O exército perdedor será eliminado
-    - O exército vencedor terá sua vida reduzida pela quantidade de dano sofrida
-- Ao final da batlha, o exército vencedor poderá ocupar a província
-- A provincia ocupada ficará sem produzir unidades por 3 turnos após a conquista
+- Sistema com base em turnos    Check
+- Um exército marcado como atacante e outro como defensor   Check
+- Fatores que irão influenciar na batalha:  Check
+    - Valor de ataque do exército ofensor   Check
+    - Valor de defesa do exército defensor  Check
+    - Terreno da província  Check
+    - Quanto menor a vida da tropa, menor será sua pontuação de ataque e defesa     Check
+    - A pontuação de ataque e defesa terá um multiplicador randômico. O multiplicador terá um intervalo maior para o ataque e menor para a defesa no exército ofensor e vice-versa para o defensor  Check
+    - A quantidade de dano infligida será baseada na diferença entre a pontuação de ataque e defesa dos exércitos  Check
+    - O exército defensor causará dano de retaliação    Check
+    - Uma vez travado em batalha, nenhum dos exércitos poderá tomar outra ação até o fim dela.  Check
+    - Reforços poderão ser enviados para a batalha de ambas as partes   Check
+    - A batalha acabará quando a vida de um dos exércitos chegar a 0. O exército perdedor será eliminado    Check
+    - O exército vencedor terá sua vida reduzida pela quantidade de dano sofrida    Check
+- Ao final da batlha, o exército vencedor poderá ocupar a província     Check
+- A provincia ocupada ficará sem produzir unidades por 3 turnos após a conquista    Check
 - A cura do exército impossibilitará o movimento até o exército estar com a vida cheia ou ser cancelado pelo usuário
-- Batalhas que durarem mais de 10 turnos serão consideradas batalhas épicas e terão seus multiplicadores randômicos potencializados.
-- Avançar em uma provincia não pertencente ao jogador será considerado um ataque
+- Batalhas que durarem mais de 10 turnos serão consideradas batalhas épicas e terão seus multiplicadores randômicos potencializados.    Check
+- Avançar em uma provincia não pertencente ao jogador será considerado um ataque    Check
+
+"""
+
+"""
+Sistema de Cura de Exércitos:
+- Cura modificada pela provincia
+- Cura será feita em turnos
+- Cura será limitada pelo total de vida do exército
+- Um exército em movimento não poderá ser curado
+- Um exército em batalha não poderá ser curado
+- Um exército se curando não poderá realizar outra ação até o fim da cura ou ela ser cancelada
+- Haverá um contador exibindo quantos turnos faltam para terminar a cura
+- A cura não poderar executar mais de uma vez por turno
+- A cura não poderá exceder 50% da vida atual do exército
+- Exércitos em cura serão exibidos no mapa com a simbologia de cura
 
 """

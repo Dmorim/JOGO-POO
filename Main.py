@@ -2,6 +2,7 @@ from Player import Player
 from Terrain import Terrain
 from Province import Province
 from Game import Game
+from IA import IA
 
 
 class Main:
@@ -11,6 +12,10 @@ class Main:
         player2 = Player("IA 1")
         player3 = Player("IA 2")
         player4 = Player("IA 3")
+
+        player2.set_ia(IA("IA 1", player2))
+        player3.set_ia(IA("IA 2", player3))
+        player4.set_ia(IA("IA 3", player4))
 
         ### Criação de Terrenos ###
         planice = Terrain("Planice", 1, 1, 1)

@@ -124,27 +124,46 @@ class Game:
                 self.mapmode = True
                 self.army_move_points()
 
-                while player.can_perform_action():
-                    # Perform action based on player's choice
-                    if self.mapmode:
-                        self.print_map()
-                    print(
-                        f"{'='*25}\nJogador Atual: {self.current_player.get_player_name()}"
-                    )
-                    print(
-                        f"Pontos de Ação: {self.current_player.get_player_actions()}\n"
-                    )
-                    action = input("Escolha uma opção: ")
-                    if action == "1":
-                        self.army_actions(self.current_player)
-                    elif action == "2":
-                        self.upgrade_province(self.current_player)
-                    elif action == "3":
-                        self.attack_province()
-                    elif action == "0":
-                        break
+                while self.current_player.can_perform_action():
+                    if self.current_player.get_ia() is None:
+                        # Perform action based on player's choice
+                        if self.mapmode:
+                            self.print_map()
+                        print(
+                            f"{'='*25}\nJogador Atual: {self.current_player.get_player_name()}"
+                        )
+                        print(
+                            f"Pontos de Ação: {round(self.current_player.get_player_actions(), 2)}\n"
+                        )
+                        action = input("Escolha uma opção: ")
+                        if action == "1":
+                            self.army_actions(self.current_player)
+                        elif action == "2":
+                            self.upgrade_province(self.current_player)
+                        elif action == "3":
+                            self.attack_province()
+                        elif action == "0":
+                            break
+                        else:
+                            print("Invalid action. Try again.")
                     else:
-                        print("Invalid action. Try again.")
+                        act, var = self.current_player.ia.act_do()
+                        print(act)
+                        if act == "Mover":
+                            army, province = var
+                            self.army_make_movement(army, None, province)
+                            print(f"Exército movido para {province.get_name()}")
+                        elif act == "Upgrade":
+                            prov = var
+                            self.current_player.action_upgrade_province(prov)
+                            self.upgrade_province(self.current_player, prov)
+                            print(f"Província {prov.get_name()} melhorada")
+                        elif act == "Curar":
+                            heal_army = var
+                            self.heal_army(heal_army)
+                            print(f"Exército curado")
+                        elif act == "Pular":
+                            break
 
                 # Update game state
 
@@ -224,27 +243,33 @@ class Game:
         else:
             print("Não há exércitos disponíveis.")
 
-    def upgrade_province(self, player_m):
-        # Implement province upgrade logic
-        index_list = [
-            player_m.get_player_province().index(province) + 1
-            for province in player_m.get_player_province()
-        ]
-        up_prov = input(
-            f"Selecione a província para ser melhorada: {[f'{province.get_name()} ({player_m.get_player_province().index(province) + 1})' for province in player_m.get_player_province()]} "
-        )
-        if int(up_prov) in index_list:
-            action = player_m.action_upgrade_province(
-                player_m.get_player_province()[index_list.index(int(up_prov))]
+    def upgrade_province(self, player_m, province=None):
+        if province == None:
+            index_list = [
+                player_m.no_battle_province().index(province) + 1
+                for province in player_m.no_battle_province()
+            ]
+            up_prov = input(
+                f"Selecione a província para ser melhorada: {[f'{province.get_name()} ({player_m.no_battle_province().index(province) + 1})' for province in player_m.no_battle_province()]} "
             )
-            if action:
-                player_m.get_player_province()[index_list.index(int(up_prov))].upgrade()
-                print(
-                    player_m.get_player_province()[index_list.index(int(up_prov))].level
+            if int(up_prov) in index_list:
+                action = player_m.action_upgrade_province(
+                    player_m.no_battle_province()[index_list.index(int(up_prov))]
                 )
-            else:
-                print("Não há pontos de ação suficientes para realizar a ação.")
-                self.mapmode = False
+                if action:
+                    player_m.no_battle_province()[
+                        index_list.index(int(up_prov))
+                    ].upgrade()
+                    print(
+                        player_m.no_battle_province()[
+                            index_list.index(int(up_prov))
+                        ].level
+                    )
+                else:
+                    print("Não há pontos de ação suficientes para realizar a ação.")
+                    self.mapmode = False
+        else:
+            province.upgrade()
 
     def attack_province(self):
         # Implement province attack logic
@@ -385,8 +410,11 @@ class Game:
             print("Província inválida")
             self.mapmode = False
 
-    def army_make_movement(self, selected_army, move_to):
-        dest_prov = selected_army.get_province().get_neighbors()[int(move_to) - 1]
+    def army_make_movement(self, selected_army, move_to, destination=None):
+        if destination is not None:
+            dest_prov = destination
+        else:
+            dest_prov = selected_army.get_province().get_neighbors()[int(move_to) - 1]
         move_needed = round(
             (
                 selected_army.get_province().get_move_req()

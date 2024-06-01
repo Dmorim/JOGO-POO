@@ -71,3 +71,5 @@ class Province:
 
     def get_dom_turns(self):
         return self.dom_turns
+
+    

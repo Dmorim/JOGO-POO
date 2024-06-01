@@ -7,6 +7,7 @@ class Player:
         self.provinces = []
         self.armys = []
         self.actions = 0
+        self.ia = None
 
     def add_province(self, province: object):
         self.provinces.append(province)
@@ -45,9 +46,9 @@ class Player:
             return True
         return False
 
-    def action_attack_province(self):
-        if self.actions >= 1:
-            self.actions -= 1
+    def get_upgrade_cost(self, province):
+        modi = province.get_terrain().get_upgrade_modifier()
+        return round(1.50 * modi, 2)
 
     def action_heal_army(self):
         if self.actions >= 0.75:
@@ -65,3 +66,23 @@ class Player:
             removed = army_group.remove_army(army)
             if removed is not None:
                 self.add_army(army)
+
+    def no_battle_province(self):
+        pov = []
+        for province in self.provinces:
+            if province.get_in_battle() is False:
+                pov.append(province)
+        return pov
+
+    def wound_army(self):
+        return [army for army in self.armys 
+                if army.get_health() != army.get_max_health() 
+                and not army.get_in_healing() 
+                and not army.get_in_move() 
+                and not army.get_province().get_in_battle()]
+    
+    def get_ia(self):
+        return self.ia
+    
+    def set_ia(self, ia):
+        self.ia = ia

@@ -47,7 +47,7 @@ class IA:
             return "Pular", None
 
     def act_move(self):
-        army = self.player.get_armys()
+        army = self.player.get_no_move_armys()
         army_choose = random.choice(army)
         province = army_choose.get_province()
         neighbors = province.get_neighbors()

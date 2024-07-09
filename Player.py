@@ -33,6 +33,9 @@ class Player:
     def get_armys(self):
         return self.armys
 
+    def get_no_move_armys(self):
+        return [army for army in self.armys if not army.get_in_move()]
+
     def action_move_army(self):
         if self.actions >= 0.75:
             self.actions -= 0.75
@@ -75,14 +78,17 @@ class Player:
         return pov
 
     def wound_army(self):
-        return [army for army in self.armys 
-                if army.get_health() != army.get_max_health() 
-                and not army.get_in_healing() 
-                and not army.get_in_move() 
-                and not army.get_province().get_in_battle()]
-    
+        return [
+            army
+            for army in self.armys
+            if army.get_health() != army.get_max_health()
+            and not army.get_in_healing()
+            and not army.get_in_move()
+            and not army.get_province().get_in_battle()
+        ]
+
     def get_ia(self):
         return self.ia
-    
+
     def set_ia(self, ia):
         self.ia = ia

@@ -79,6 +79,7 @@ class Game:
         for battle in self.ongoing_battles:
             if battle.off_army_owner == self.current_player:
                 up_bat = battle.battle_going()
+                print(up_bat)
                 if up_bat is True:
                     self.army_health_check()
                     self.remove_battle(battle)

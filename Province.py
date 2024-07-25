@@ -10,6 +10,7 @@ class Province:
         self.move_req = move_req
         self.in_battle = False
         self.dom_turns = 0
+        self.create_army_requisition = 5
 
         self.level_defence_modifiers = {1: 1.0, 2: 1.5, 3: 1.6, 4: 1.75, 5: 1.9}
 
@@ -19,7 +20,7 @@ class Province:
 
     def produce_army(self):
         self.army_progress += self.level
-        if self.army_progress >= 1:
+        if self.army_progress >= self.create_army_requisition:
             if not self.get_in_battle():
                 if self.dom_turns == 0:
                     self.current_owner.army_creation(self)
@@ -72,4 +73,5 @@ class Province:
     def get_dom_turns(self):
         return self.dom_turns
 
-    
+    def get_level_cap(self):
+        return self.level_cap

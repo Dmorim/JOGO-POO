@@ -43,15 +43,15 @@ class Player:
         return False
 
     def action_upgrade_province(self, province):
-        modi = province.get_terrain().get_upgrade_modifier()
-        if self.actions >= round(1.50 * modi, 2):
-            self.actions -= round(1.50 * modi, 2)
+        modi = self.get_upgrade_cost(province)
+        if self.actions >= modi:
+            self.actions -= modi
             return True
         return False
 
     def get_upgrade_cost(self, province):
         modi = province.get_terrain().get_upgrade_modifier()
-        return round(1.50 * modi, 2)
+        return round(2 * modi, 2)
 
     def action_heal_army(self):
         if self.actions >= 0.75:
@@ -92,3 +92,38 @@ class Player:
 
     def set_ia(self, ia):
         self.ia = ia
+
+    def no_battle_armies(self):
+        return [army for army in self.armys if not army.get_province().get_in_battle()]
+
+    def get_army_in_move(self):
+        return [army for army in self.armys if army.get_in_move()]
+
+    def get_army_in_healing(self):
+        return [
+            army
+            for army in self.armys
+            if army.get_in_healing()
+            and not army.get_in_move()
+            and not army.get_in_battle()
+        ]
+
+    def get_available_army(self):
+        return [
+            army
+            for army in self.armys
+            if not army.get_in_move() and not army.get_in_battle()
+        ]
+
+    def get_available_province(self):
+        return [
+            province
+            for province in self.provinces
+            if not province.get_in_battle()
+            and province.get_owner() == self
+            and province.get_dom_turns() == 0
+            and province.get_level() < province.get_level_cap()
+        ]
+
+    def get_no_healing_armys(self):
+        return [army for army in self.armys if not army.get_in_healing()]

@@ -19,20 +19,32 @@ class Battle:
     def create_off_army(self):
         for army in self.off_army_owner.get_armys():
             if army.get_province() == self.province:
-                print(army.get_owner().get_player_name())
                 self.off_army.append(army)
+                army.set_in_battle(True)
 
     def create_def_army(self):
         for army in self.def_army_owner.get_armys():
             if army.get_province() == self.province:
-                print(army.get_owner().get_player_name())
                 self.def_army.append(army)
+                army.set_in_battle(True)
 
     def add_off_army(self, army):
         self.off_army.append(army)
+        army.set_in_battle(True)
 
     def add_def_army(self, army):
         self.def_army.append(army)
+        army.set_in_battle(True)
+
+    def remove_off_army(self, army):
+        self.off_army.remove(army)
+        if len(self.off_army) == 0:
+            self.army_check()
+
+    def remove_def_army(self, army):
+        self.def_army.remove(army)
+        if len(self.def_army) == 0:
+            self.army_check()
 
     def get_off_total_health(self):
         return sum([army.get_max_health() for army in self.off_army])
@@ -176,12 +188,48 @@ class Battle:
         return def_damage if def_damage > 0 else 0.1
 
     def health_check(self):
-        if self.get_off_actual_health() <= 0:
+        redo = False
+        for army in self.off_army:
+            if isinstance(army, Army_Group):
+                if len(army.armys) == 0:
+                    self.remove_off_army(army)
+                    return self.army_check()
+                else:
+                    for ar in army.armys:
+                        if ar.get_health() <= 0:
+                            army.remove_army(ar)
+                            redo = True
+            else:
+                if army.get_health() <= 0:
+                    self.remove_off_army(army)
+                    return self.army_check()
+
+        for army in self.def_army:
+            if isinstance(army, Army_Group):
+                if len(army.armys) == 0:
+                    self.remove_def_army(army)
+                    return self.army_check()
+                else:
+                    for ar in army.armys:
+                        if ar.get_health() <= 0:
+                            army.remove_army(ar)
+                            redo = True
+            else:
+                if army.get_health() <= 0:
+                    self.remove_def_army(army)
+                    return self.army_check()
+        if redo:
+            self.health_check()
+
+        return self.army_check()
+
+    def army_check(self):
+        if self.total_off_army() == 0:
             self.winner = self.def_army_owner
             self.loser = self.off_army_owner
             print("Exército atacante derrotado!")
             return True
-        elif self.get_def_actual_health() <= 0:
+        elif self.total_def_army() == 0:
             self.winner = self.off_army_owner
             self.loser = self.def_army_owner
             print("Exército defensor derrotado!")
@@ -189,6 +237,10 @@ class Battle:
         return False
 
     def battle_going(self):
+        check = self.health_check()
+        if check:
+            return True
+
         self.turn_update()
         off_attack_stats = self.get_off_total_attack()
         def_attack_stats = self.get_def_total_attack()

@@ -13,11 +13,18 @@ class IA:
         acts_ = list(self.acoes_custo.keys())
         act = random.choice(acts_)
         if act == "Up_Prov":
-            prov = random.choice(self.player.no_battle_province())
-            self.acoes_custo[act] = self.player.get_upgrade_cost(prov)
+            if len(self.player.no_battle_province()) == 0:
+                redo = True
+            else:
+                prov = random.choice(self.player.no_battle_province())
+                self.acoes_custo[act] = self.player.get_upgrade_cost(prov)
 
         elif act == "mover":
             if len(self.player.get_armys()) == 0:
+                redo = True
+            elif len(self.player.get_available_army()) == 0:
+                redo = True
+            elif len(self.player.get_no_healing_armys()) == 0:
                 redo = True
 
         elif act == "curar":

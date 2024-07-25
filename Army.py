@@ -12,6 +12,7 @@ class Army:
         self.move_points = 0
         self.in_move = False
         self.in_healing = False
+        self.in_battle = False
 
     def get_attack(self):
         return self.attack
@@ -66,12 +67,17 @@ class Army:
     def set_in_healing(self, healing):
         self.in_healing = healing
 
+    def get_in_battle(self):
+        return self.in_battle
+
+    def set_in_battle(self, battle: bool):
+        self.in_battle = battle
+
 
 class Army_Group(Army):
     def __init__(self, current_province, owner, attack=1, defense=1):
         super().__init__(current_province, owner, attack, defense)
         self.armys = []
-        self.in_move = False
 
     def add_army(self, army):
         self.armys.append(army)

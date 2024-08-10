@@ -127,3 +127,6 @@ class Player:
 
     def get_no_healing_armys(self):
         return [army for army in self.armys if not army.get_in_healing()]
+
+    def get_armys_in_province(self, province):
+        return [army for army in self.armys if army.get_province() == province]

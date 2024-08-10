@@ -15,6 +15,8 @@ class Battle:
         self.loser = None
         self.last_off_damage = 0
         self.last_def_damage = 0
+        self.diff_health_multiplier = 0.25
+        self.damage_multiplier = 1.1
 
     def create_off_army(self):
         for army in self.off_army_owner.get_armys():
@@ -38,13 +40,9 @@ class Battle:
 
     def remove_off_army(self, army):
         self.off_army.remove(army)
-        if len(self.off_army) == 0:
-            self.army_check()
 
     def remove_def_army(self, army):
         self.def_army.remove(army)
-        if len(self.def_army) == 0:
-            self.army_check()
 
     def get_off_total_health(self):
         return sum([army.get_max_health() for army in self.off_army])
@@ -134,8 +132,13 @@ class Battle:
         off_damage = round(
             (
                 (
-                    ((off_attack_stats * self.off_diff_health()))
-                    * random.uniform(0.6, 1.6)
+                    (
+                        (
+                            off_attack_stats
+                            * (self.off_diff_health() * self.diff_health_multiplier)
+                        )
+                    )
+                    * random.uniform(0.8, 1.6)
                 )
                 - (
                     (
@@ -147,42 +150,55 @@ class Battle:
                                 )
                                 * self.province.get_defence_modifier()
                             )
-                            * self.def_diff_health()
+                            * (self.def_diff_health() * self.diff_health_multiplier)
                         )
-                        * random.uniform(0.7, 1.4)
+                        * random.uniform(0.8, 1.4)
                     )
                 )
-            ),
+            )
+            * self.damage_multiplier,
             2,
         )
-        """
+
         print(
-            f"Dano base do exército atacante: {off_attack_stats * self.off_diff_health()} + diferença de saúde {self.off_diff_health()}"
+            f"Dano total do exército atacante: {off_attack_stats
+                            * (self.off_diff_health() * self.diff_health_multiplier)} + diferença de saúde {self.off_diff_health()}"
         )
         print(
             f"Valor base do exército defensor: {(def_defense_stats * self.province.get_terrain().get_defence_modifier()) * self.province.get_defence_modifier()}"
         )
         print(
-            f"Valor total do exército defensor: {((def_defense_stats * self.province.get_terrain().get_defence_modifier()) * self.province.get_defence_modifier()) * self.def_diff_health()} + diferença de saúde {self.def_diff_health()}"
+            f"Valor total do exército defensor: {((def_defense_stats
+                                    * self.province.get_terrain().get_defence_modifier()
+                                )
+                                * self.province.get_defence_modifier()
+                            )
+                            * (self.def_diff_health() * self.diff_health_multiplier)} + diferença de saúde {self.def_diff_health()}"
         )
-        """
+
         return off_damage if off_damage > 0 else 0.1
 
     def def_damage(self, def_attack_stats, off_defense_stats):
         def_damage = round(
             (
                 (
-                    ((def_attack_stats * self.def_diff_health()))
+                    (
+                        (
+                            def_attack_stats
+                            * (self.def_diff_health() * self.diff_health_multiplier)
+                        )
+                    )
                     * random.uniform(0.6, 1.3)
                 )
                 - (
                     (
                         off_defense_stats
-                        * (self.off_diff_health())
+                        * (self.off_diff_health() * self.diff_health_multiplier)
                         * random.uniform(0.5, 1.1)
                     )
                 )
-            ),
+            )
+            * self.damage_multiplier,
             2,
         )
         return def_damage if def_damage > 0 else 0.1
@@ -226,11 +242,15 @@ class Battle:
     def army_check(self):
         if self.total_off_army() == 0:
             self.winner = self.def_army_owner
+            for army in self.def_army:
+                army.set_in_battle(False)
             self.loser = self.off_army_owner
             print("Exército atacante derrotado!")
             return True
         elif self.total_def_army() == 0:
             self.winner = self.off_army_owner
+            for army in self.off_army:
+                army.set_in_battle(False)
             self.loser = self.def_army_owner
             print("Exército defensor derrotado!")
             return True
@@ -242,13 +262,13 @@ class Battle:
             return True
 
         self.turn_update()
-        off_attack_stats = self.get_off_total_attack()
-        def_attack_stats = self.get_def_total_attack()
-        off_defense_stats = self.get_off_total_defense()
-        def_defense_stats = self.get_def_total_defense()
 
-        off_damage = self.off_damage(off_attack_stats, def_defense_stats)
-        def_damage = self.def_damage(def_attack_stats, off_defense_stats)
+        off_damage = self.off_damage(
+            self.get_off_total_attack(), self.get_def_total_defense()
+        )
+        def_damage = self.def_damage(
+            self.get_def_total_attack(), self.get_off_total_defense()
+        )
 
         if self.get_turns_count() == self.get_epic_turns():
             print("Batalha épica!")
@@ -301,32 +321,20 @@ if __name__ == "__main__":
 
     teste = Battle(atacante, defensor, prov)
     teste.add_off_army(army_off)
-    # teste.add_off_army(army_off2)
-    # teste.add_off_army(army_off3)
-    # teste.add_off_army(army_off4)
+    teste.add_off_army(army_off2)
+    teste.add_off_army(army_off3)
+    teste.add_off_army(army_off4)
     # teste.add_off_army(army_off5)
 
     teste.add_def_army(army_def)
-    # teste.add_def_army(army_def2)
-    # teste.add_def_army(army_def3)
-    # teste.add_def_army(army_def4)
+    teste.add_def_army(army_def2)
+    teste.add_def_army(army_def3)
+    teste.add_def_army(army_def4)
 
     for i in range(0, 100):
         var = teste.battle_going()
         print(
             f"\nVida do exército atacante: {teste.get_off_actual_health()}\nVida do exército defensor: {teste.get_def_actual_health()}\n"
         )
-        if i == 20:
-            teste.add_off_army(army_off2)
-            teste.add_off_army(army_off3)
-            teste.add_off_army(army_off4)
-            teste.add_def_army(army_def2)
-            teste.add_def_army(army_def3)
-            print("Reforços chegaram!")
-
-        if i == 40:
-            teste.add_off_army(army_off5)
-            teste.add_def_army(army_def4)
-            print("Reforços chegaram!")
         if var is True:
             break

@@ -138,3 +138,6 @@ class Army_Group(Army):
     def heal_army_action(self):
         for i, army in enumerate(self.armys):
             army.health += self.heal_army_value()[i]
+
+    def get_neighbours_provinces(self):
+        return self.current_province.get_neighbors()

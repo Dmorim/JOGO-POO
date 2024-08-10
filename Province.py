@@ -75,3 +75,6 @@ class Province:
 
     def get_level_cap(self):
         return self.level_cap
+
+    def get_armys(self):
+        return self.current_owner.get_armys_in_province(self)

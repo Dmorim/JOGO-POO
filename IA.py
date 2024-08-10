@@ -6,40 +6,23 @@ class IA:
         self.name = name
         self.player = player
         self.acoes_custo = {"mover": 0.75, "Up_Prov": 1.5, "curar": 0.75, "pular": 0.0}
+        self.acoes_weight = {"mover": 1, "Up_Prov": 1, "curar": 1, "pular": 0.5}
 
     def act_choose(self):
         redo = False
         act_points = self.player.get_player_actions()
         acts_ = list(self.acoes_custo.keys())
-        act = random.choice(acts_)
-        if act == "Up_Prov":
-            if len(self.player.no_battle_province()) == 0:
-                redo = True
-            else:
-                prov = random.choice(self.player.no_battle_province())
-                self.acoes_custo[act] = self.player.get_upgrade_cost(prov)
 
-        elif act == "mover":
-            if len(self.player.get_armys()) == 0:
-                redo = True
-            elif len(self.player.get_available_army()) == 0:
-                redo = True
-            elif len(self.player.get_no_healing_armys()) == 0:
-                redo = True
+        for act in acts_:
+            if act_points < self.acoes_custo[act]:
+                acts_.remove(act)
 
-        elif act == "curar":
-            if len(self.player.wound_army()) == 0:
-                redo = True
-
-        if redo:
-            return self.act_choose()
-        if act_points < self.acoes_custo[act]:
-            return self.act_choose()
-
-        if act_points >= self.acoes_custo[act] and act != "Up_Prov" and redo == False:
-            return act, None
-        elif act_points >= self.acoes_custo[act] and act == "Up_Prov" and redo == False:
-            return act, prov
+        for act in acts_:
+            match act:
+                case "mover":
+                    armys = self.player.get_available_army()
+                    if not armys:
+                        self.acoes_weight[act] = 0
 
     def act_do(self):
         act, prov = self.act_choose()
@@ -71,3 +54,35 @@ class IA:
         if heal_army.get_in_healing():
             self.act_heal()
         return heal_army
+
+
+"""
+- Pontuação de ação para realizar a escolha
+- Verificar se a ação é possível
+- Atribuir ou retirar peso de acordo com a situação
+- Escolher a ação
+
+    - Mover
+    - Para mover primeiro precisa de um exército disponível
+    - Se não tiver exército disponível, a ação de mover não é possível
+    - Para selecionar o exército disponível é necessário:
+        - Verificar se o exército está em movimento
+        - Verificar se o exército está em batalha
+        - Verificar se o exército está em cura
+        - Verificar se o exército está disponível para mover
+        
+    - Para encontrar o melhor exército disponível para mover é necessário:
+        - Verificar o tamanho do exército
+        - Verificar a vida do exército
+        - Verificar a força do exército
+
+    -Assumindo que um exército foi escolhido, para encontrar a melhor província para mover é necessário:
+        - Verificar a defesa da província
+        - Verificar a quantidade de exércitos inimigos na província
+        - Verificar a vida dos exércitos inimigos na província
+        - Verificar a defesa dos exércitos inimigos na província
+        - Verificar o terreno da província
+        - 
+    
+
+"""

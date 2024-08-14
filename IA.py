@@ -85,6 +85,7 @@ class IA:
         - Comparar a força do exército com a defesa e o exército da província
         - Verificar qual dos possíveis movimentos é o mais vantajoso
         - Verificar a quantidade de exército aliado na província
+        - Verificara existencia de batalhas na provincia envolvendo a IA
     
     - Assumindo que a província e o exército forma escolhidos, a ação de mover deve ganhar uma pontuação com base no quão vantajoso é o movimento
     - A ação de mover deve perder pontos se o movimento não for vantajoso
@@ -93,14 +94,28 @@ class IA:
     
     Sistema de Pontuação para escolher o exército:
         - Pontuação base: 1
-        - Dedução pontuação com base na vida (1 - (vida atual/vida total))
+        - Dedução pontuação com base na vida:
+            - (1 - (vida atual/vida total))
         - Verificação dos valores de ataque e defesa:
             - Ataque + defesa)/ 10
         - Verificação do tamanho do exército:
             - Tamanho/100
         
-        Concluise:
-        X = 1 + (-(1 - (vida atual/vida total)) + ((ataque + defesa)/10) + (tamanho/100))
+        Conclui-se:
+            X = 1 + (-(1 - (vida atual/vida total)) + ((ataque + defesa)/10) + (tamanho/100))
+            
     Sistema de Pontuação para escolher a província:
+        Pontuação base: 0
+        Variação de pontuação com base no nível de defesa da provincia:
+            - (1 - modificador de defesa)
+        Variação da pontuação com base na quantidade de exércitos inimigos na província:
+            - ((0.02 * quantidade)) até um máximo de 2
+        Variação da pontuação com base na vida dos exércitos inimigos na província:
+            - (1 - (vida atual/vida total))
+        
+        
+        
+        Concluí-se:
+            Y = 0 + (1 - modificador de defesa) + ((0.02 * quantidade)) + (1 - (vida atual/vida total))
 
 """

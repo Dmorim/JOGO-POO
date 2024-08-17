@@ -93,29 +93,56 @@ class IA:
     - A pontuação da ação de mover será igual a maior pontuação das ações possíveis
     
     Sistema de Pontuação para escolher o exército:
-        - Pontuação base: 1
+        - Pontuação base: 0
         - Dedução pontuação com base na vida:
-            - (1 - (vida atual/vida total))
+            - (1 - (vida atual / vida total))
         - Verificação dos valores de ataque e defesa:
-            - Ataque + defesa)/ 10
+            - (Ataque + defesa) / 10
         - Verificação do tamanho do exército:
-            - Tamanho/100
+            - Tamanho / 100
         
         Conclui-se:
-            X = 1 + (-(1 - (vida atual/vida total)) + ((ataque + defesa)/10) + (tamanho/100))
+            X = 0 + (-(1 - (vida atual/vida total)) + ((ataque + defesa)/10) + (tamanho/100))
             
     Sistema de Pontuação para escolher a província:
-        Pontuação base: 0
-        Variação de pontuação com base no nível de defesa da provincia:
-            - (1 - modificador de defesa)
-        Variação da pontuação com base na quantidade de exércitos inimigos na província:
-            - ((0.02 * quantidade)) até um máximo de 2
-        Variação da pontuação com base na vida dos exércitos inimigos na província:
-            - (1 - (vida atual/vida total))
+        Pontuação base: 1
+        
+        Variação da pontuação com base na quantidade de exércitos na província:
+            - (1 / (1 + (quantidade / 10)))
+        Variação da pontuação com base na vida dos exércitos na província:
+            - (1 - (vida atual / vida total))
+        Variação com base na quantidade de exércitos aliados na província:
+            - (1 / (1 + (quantidade / 10))
+        Pontuação com base na existência de batalhas na província:
+            - 0.5
+            
+        Caso a provincia seja inimiga:
+            Variação de pontuação com base no nível de defesa da provincia:
+                - (1 - modificador de defesa)
+            Variação com base na defesa dos exércitos inimigos na província:
+                - (valor de defesa / 100)
+            Variação com base na diferença de força entre o exército e a defesa da província:
+                - (valor de ataque aliado / valor de defesa inimiga) / 10
+            Variação com base na diferença de vida entre o exército e a defesa da província:
+                - (vida do exército / vida da defesa) / 10 
+            Variação com base no terreno da província:
+                - (1 - terreno)
+            
+            Conclui-se:
+                Y = 1 + (1 / (1 + (quantidade / 10))) + (1 - (vida atual / vida total)) + (1 - (vida atual/vida total) - (valor de defesa/100) - (1 - terreno) + (valor de ataque - valor de defesa)/10) + (vida do exército / vida da defesa) / 10
+                
+        Caso a província seja aliada:
+            Variação de pontuação com base no nível de defesa da provincia:
+                - (1 - modificador de defesa)
+            Variação com base na defesa dos exércitos aliados na província:
+                - (valor de defesa / 100)
+            Variação com base na diferença de força entre o exército e a defesa da província:
+                - (valor de ataque - valor de defesa)/10
+            Variacao com base no terreno da província:
         
         
         
         Concluí-se:
-            Y = 0 + (1 - modificador de defesa) + ((0.02 * quantidade)) + (1 - (vida atual/vida total))
+            Y = 1 - (1 - modificador de defesa) - ((0.02 * quantidade)) + (1 - (vida atual/vida total) - (valor de defesa/100) - (1 - terreno) + (valor de ataque - valor de defesa)/10)
 
 """

@@ -8,6 +8,30 @@ class IA:
         self.acoes_custo = {"mover": 0.75, "Up_Prov": 1.5, "curar": 0.75, "pular": 0.0}
         self.acoes_weight = {"mover": 1, "Up_Prov": 1, "curar": 1, "pular": 0.5}
 
+    def get_army_value(self, army_list):
+        def sum_val(army):
+            army_health_modifier = 1 - (army.get_health() / army.get_max_health())
+            army_stats_modifier = (army.get_attack() + army.get_defense()) / 10
+            army_size_modifier = 1 / (1 - (army.get_max_health() / 1000))
+            calc_val = (
+                0 + (-army_health_modifier) + army_stats_modifier + army_size_modifier
+            )
+            return calc_val
+
+        max_val = float("-inf")
+        best_army = None
+
+        for army in army_list:
+            current_value = sum_val(army)
+            if current_value > max_val:
+                max_val = current_value
+                best_army = army
+
+        return best_army
+
+    def get_province_value(self, province, army: object):
+        pass
+
     def act_choose(self):
         redo = False
         act_points = self.player.get_player_actions()
@@ -23,6 +47,8 @@ class IA:
                     armys = self.player.get_available_army()
                     if not armys:
                         self.acoes_weight[act] = 0
+                    else:
+                        province = self.get_province_value((self.get_army_value(armys)))
 
     def act_do(self):
         act, prov = self.act_choose()
@@ -115,6 +141,11 @@ class IA:
             - (1 / (1 + (quantidade / 10))
         Pontuação com base na existência de batalhas na província:
             - 0.5
+        Pontuação caso a província tenha exército = 0:
+            - 1
+            
+        Concluí-se:
+            Y = (1 / (1 + (quantidade / 10))) + (1 - (vida atual / vida total)) + (1 / (1 + (quantidade / 10)) + 0.5 + 1)
             
         Caso a provincia seja inimiga:
             Variação de pontuação com base no nível de defesa da provincia:
@@ -124,25 +155,32 @@ class IA:
             Variação com base na diferença de força entre o exército e a defesa da província:
                 - (valor de ataque aliado / valor de defesa inimiga) / 10
             Variação com base na diferença de vida entre o exército e a defesa da província:
-                - (vida do exército / vida da defesa) / 10 
+                - (vida do exército / vida da defesa) / 10
+            Variação com base na diferença de quantidade de exércitos inimigos na província:
+                - (quantidade de exércitos aliados / quantidade de exércitos inimigos) / 10
             Variação com base no terreno da província:
                 - (1 - terreno)
             
             Conclui-se:
-                Y = 1 + (1 / (1 + (quantidade / 10))) + (1 - (vida atual / vida total)) + (1 - (vida atual/vida total) - (valor de defesa/100) - (1 - terreno) + (valor de ataque - valor de defesa)/10) + (vida do exército / vida da defesa) / 10
+                Y = (1 - modificador de defesa) - (valor de defesa / 100) + ((valor de ataque aliado / valor de defesa inimiga) / 10) + ((vida do exército / vida da defesa) / 10) + ((quantidade de exércitos aliados / quantidade de exércitos inimicos) / 10) - (1 - terreno)
                 
         Caso a província seja aliada:
             Variação de pontuação com base no nível de defesa da provincia:
-                - (1 - modificador de defesa)
-            Variação com base na defesa dos exércitos aliados na província:
-                - (valor de defesa / 100)
-            Variação com base na diferença de força entre o exército e a defesa da província:
-                - (valor de ataque - valor de defesa)/10
+                - ((1 - modificador de defesa) / 3)
+            Variação de pontuação com base na defesa dos exercitos aliados na provincia:
+                - (( 1 / (1 + defesa)) / 10)
+            Variação com base na quantidade de exércitos na província:
+                - (1 / (1 + (quantidade / 10)))
+            Variação com base na vida dos exércitos na província:
+                - (1 - (vida atual / vida total))
             Variacao com base no terreno da província:
-        
+                - ((1 - terreno) / 3)
+            Pontuação caso exista provincia vizinha com exército maior:
+                - 0.3
+
         
         
         Concluí-se:
-            Y = 1 - (1 - modificador de defesa) - ((0.02 * quantidade)) + (1 - (vida atual/vida total) - (valor de defesa/100) - (1 - terreno) + (valor de ataque - valor de defesa)/10)
+            Y = ((1 - modificador de defesa) / 3) + (( 1 / (1 + defesa)) / 10) + (1 / (1 + (quantidade / 10))) + (1 - (vida atual / vida total)) + ((1 - terreno) / 3) + 0.3
 
 """

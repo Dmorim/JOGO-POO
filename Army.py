@@ -73,6 +73,9 @@ class Army:
     def set_in_battle(self, battle: bool):
         self.in_battle = battle
 
+    def get_army_quant(self):
+        return 1
+
 
 class Army_Group(Army):
     def __init__(self, current_province, owner, attack=1, defense=1):
@@ -141,3 +144,9 @@ class Army_Group(Army):
 
     def get_neighbours_provinces(self):
         return self.current_province.get_neighbors()
+
+    def get_army_quant(self):
+        quant = 0
+        for army in self.armys:
+            quant += army.get_army_quant()
+        return quant

@@ -14,7 +14,7 @@ class IA:
             army_stats_modifier = (army.get_attack() + army.get_defense()) / 10
             army_size_modifier = 1 / (1 - (army.get_max_health() / 1000))
             calc_val = (
-                0 + (-army_health_modifier) + army_stats_modifier + army_size_modifier
+                0 - army_health_modifier + army_stats_modifier + army_size_modifier
             )
             return calc_val
 
@@ -30,8 +30,62 @@ class IA:
         return best_army
 
     def get_province_value(self, army: object):
-        def sum_val():
-            
+        from Army import ArmyGroup
+
+        def sum_army(army):
+            tot = 0
+            for armies in army:
+                if isinstance(armies, ArmyGroup):
+                    tot += len(armies.armys)
+                else:
+                    tot += 1
+            return tot
+
+        def army_health(army):
+            total_health = 0
+            actual_health = 0
+            for armies in army:
+                total_health += armies.get_max_health()
+                actual_health += armies.get_health()
+            return actual_health, total_health
+
+        def defence_val(army):
+            defence_value = 0
+            for armies in army:
+                defence_value += armies.get_defense()
+            return defence_value
+
+        def sum_val(province, allied_army):
+            owner = province.get_owner()
+            province_army = province.get_armys()
+            battle_modifier = 0.5
+            no_army_modifier = 1
+
+            province_army_health, province_army_max_health = army_health(province_army)
+            province_armys_quant = sum_army(army for army in province.get_armys())
+            province_allied_armys_quant = sum_army(
+                army for army in province.get_armys() if army.get_owner() == owner
+            )
+
+            province_army_defence = defence_val(province_army)
+
+            base_weight = (
+                (1 / (1 + province_armys_quant) / 10)
+                + (1 - (province_army_health / province_army_max_health))
+                + (1 / (1 + province_allied_armys_quant) / 10)
+                + battle_modifier
+                if province.get_in_battle()
+                else 0 + no_army_modifier if province_armys_quant == 0 else 0
+            )
+            enemy_province_weight = (
+                (1 - province.get_defence_modifier())
+                - (province_army_defence / 100)
+                + (allied_army.get_attack() / province_army_defence) / 10
+                + (allied_army.get_health() / province_army_health) / 10
+                + (allied_army.get_army_quant() / province_armys_quant) / 10
+                - (1 - province.get_terrain())
+            )
+
         neighbors = army.get_province().get_neighbors()
         for province in neighbors:
             pass

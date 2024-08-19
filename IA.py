@@ -29,8 +29,12 @@ class IA:
 
         return best_army
 
-    def get_province_value(self, province, army: object):
-        pass
+    def get_province_value(self, army: object):
+        def sum_val():
+            
+        neighbors = army.get_province().get_neighbors()
+        for province in neighbors:
+            pass
 
     def act_choose(self):
         redo = False

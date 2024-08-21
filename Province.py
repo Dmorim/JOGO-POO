@@ -10,7 +10,7 @@ class Province:
         self.move_req = move_req
         self.in_battle = False
         self.dom_turns = 0
-        self.create_army_requisition = 5
+        self.create_army_requisition = 1
 
         self.level_defence_modifiers = {1: 1.0, 2: 1.5, 3: 1.6, 4: 1.75, 5: 1.9}
 

@@ -12,7 +12,7 @@ class IA:
         def sum_val(army):
             army_health_modifier = 1 - (army.get_health() / army.get_max_health())
             army_stats_modifier = (army.get_attack() + army.get_defense()) / 10
-            army_size_modifier = 1 / (1 - (army.get_max_health() / 1000))
+            army_size_modifier = 1 / (1 - (army.get_army_quant() / 100)) / 10
             calc_val = (
                 0 - army_health_modifier + army_stats_modifier + army_size_modifier
             )
@@ -29,12 +29,12 @@ class IA:
 
         return best_army
 
-    def get_province_value(self, army: object):
-        def army_health(army):
+    def get_province_value(self, army):
+        def army_health(army, comparer):
             total_health = 0
             actual_health = 0
             for armies in army:
-                if armies.get_owner() != self.player:
+                if armies.get_owner() == comparer:
                     total_health += armies.get_max_health()
                     actual_health += armies.get_health()
             return actual_health, total_health
@@ -46,13 +46,35 @@ class IA:
                     defence_value += armies.get_defense()
             return defence_value
 
+        def province_verifier(province, owner):
+            army_quant = []
+            for province in province.get_neighbors():
+                if province.get_owner() != owner:
+                    army_quant.append(
+                        army.get_army_quant() for army in province.get_armys()
+                    )
+            return army_quant
+
+        def army_province_verifier(army_quanti, province, owner):
+            army_quant = province_verifier(province, owner)
+            for num in army_quant:
+                if num > army_quanti:
+                    return True
+            return False
+
         def sum_val(province, allied_army):
             owner = province.get_owner()
             province_army = province.get_armys()
             battle_modifier = 0.5
             no_army_modifier = 1
+            army_size_comparer_modifier = 0.3
 
-            province_army_health, province_army_max_health = army_health(province_army)
+            province_army_health, province_army_max_health = army_health(
+                province_army, owner
+            )
+            province_allied_army_health, province_allied_max_health = army_health(
+                province_army, self.player
+            )
             province_armys_quant = sum(
                 army.get_army_quant()
                 for army in province.get_armys()
@@ -63,7 +85,8 @@ class IA:
                 for army in province.get_armys()
                 if army.get_owner() == self.player
             )
-            province_army_defence = defence_val(province_army, self.player)
+            province_army_defence = defence_val(province_army, owner)
+            province_allied_army_defence = defence_val(province_army, self.player)
 
             base_weight = (
                 (1 / (1 + province_armys_quant) / 10)
@@ -73,23 +96,47 @@ class IA:
                 if province.get_in_battle()
                 else 0 + no_army_modifier if province_armys_quant == 0 else 0
             )
-            enemy_province_weight = (
-                (1 - province.get_defence_modifier())
-                - (province_army_defence / 100)
-                + (allied_army.get_attack() / province_army_defence) / 10
-                + (allied_army.get_health() / province_army_health) / 10
-                + (allied_army.get_army_quant() / province_armys_quant) / 10
-                - (1 - province.get_terrain())
-            )
-            allied_province_weight = (
-                ((1 - province.get_defence_modifier()) / 3)
+            if owner != self.player:
+                enemy_province_weight = (
+                    (1 - province.get_defence_modifier())
+                    - (province_army_defence / 100)
+                    + (allied_army.get_attack() / province_army_defence) / 10
+                    + (allied_army.get_health() / province_army_health) / 10
+                    + ((allied_army.get_army_quant() / province_armys_quant) / 10)
+                    if province_armys_quant != 0
+                    else 0 - (1 - province.get_terrain())
+                )
+
+                value = 1 + base_weight + enemy_province_weight
+            else:
+                allied_province_weight = (
+                    ((1 - province.get_defence_modifier()) / 3)
+                    + (1 / (1 + province_allied_army_defence) / 10)
+                    + (1 / (1 + province_allied_armys_quant) / 10)
+                    + (1 - (province_allied_army_health / province_allied_max_health))
+                    + ((1 - province.get_terrain()) / 3)
+                    + army_size_comparer_modifier
+                    if army_province_verifier(province_armys_quant, province, owner)
+                    else 0
+                )
+
+                value = 1 + base_weight + allied_province_weight
+
+            return value
 
         neighbors = army.get_province().get_neighbors()
+        max_val = float("-inf")
+        best_province = None
+
         for province in neighbors:
-            pass
+            current_value = sum_val(province, army)
+            if current_value > max_val:
+                max_val = current_value
+                best_province = province
+
+        return best_province, max_val
 
     def act_choose(self):
-        redo = False
         act_points = self.player.get_player_actions()
         acts_ = list(self.acoes_custo.keys())
 
@@ -104,11 +151,15 @@ class IA:
                     if not armys:
                         self.acoes_weight[act] = 0
                     else:
-                        province = self.get_province_value((self.get_army_value(armys)))
+                        province, mov_val = self.get_province_value(
+                            (self.get_army_value(armys))
+                        )
+                        print(province.get_name(), mov_val)
 
     def act_do(self):
-        act, prov = self.act_choose()
-        print(act)
+        self.act_choose()
+        return "Pular", None
+        """
         if act == "mover":
             return "Mover", self.act_move()
         elif act == "Up_Prov":
@@ -117,6 +168,7 @@ class IA:
             return "Curar", self.act_heal()
         elif act == "pular":
             return "Pular", None
+        """
 
     def act_move(self):
         army = self.player.get_no_move_armys()

@@ -50,17 +50,22 @@ class IA:
             army_quant = []
             for province in province.get_neighbors():
                 if province.get_owner() != owner:
-                    army_quant.append(
-                        army.get_army_quant() for army in province.get_armys()
-                    )
+                    if province.get_armys():
+                        army_quant.append(
+                            army.get_army_quant() for army in province.get_armys()
+                        )
             return army_quant
 
         def army_province_verifier(army_quanti, province, owner):
             army_quant = province_verifier(province, owner)
-            for num in army_quant:
-                if num > army_quanti:
+            for i in army_quant:
+                if army_quanti > army_quanti:
                     return True
             return False
+
+        def calc_base_weight(province, *args):
+            army_province = province.get_armys()
+            army_health = province_army_health / province_army_max_health
 
         def sum_val(province, allied_army):
             owner = province.get_owner()
@@ -88,23 +93,22 @@ class IA:
             province_army_defence = defence_val(province_army, owner)
             province_allied_army_defence = defence_val(province_army, self.player)
 
-            base_weight = (
+            base_weight: float = (
                 (1 / (1 + province_armys_quant) / 10)
                 + (1 - (province_army_health / province_army_max_health))
                 + (1 / (1 + province_allied_armys_quant) / 10)
-                + battle_modifier
-                if province.get_in_battle()
-                else 0 + no_army_modifier if province_armys_quant == 0 else 0
+                + (battle_modifier if province.get_in_battle() else 0.00)
+                + (no_army_modifier if province_armys_quant == 0 else 0.00)
             )
             if owner != self.player:
-                enemy_province_weight = (
+                enemy_province_weight: float = (
                     (1 - province.get_defence_modifier())
                     - (province_army_defence / 100)
                     + (allied_army.get_attack() / province_army_defence) / 10
                     + (allied_army.get_health() / province_army_health) / 10
                     + ((allied_army.get_army_quant() / province_armys_quant) / 10)
                     if province_armys_quant != 0
-                    else 0 - (1 - province.get_terrain())
+                    else 0.00 - (1 - province.get_terrain())
                 )
 
                 value = 1 + base_weight + enemy_province_weight
@@ -117,7 +121,7 @@ class IA:
                     + ((1 - province.get_terrain()) / 3)
                     + army_size_comparer_modifier
                     if army_province_verifier(province_armys_quant, province, owner)
-                    else 0
+                    else 0.00
                 )
 
                 value = 1 + base_weight + allied_province_weight

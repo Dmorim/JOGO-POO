@@ -67,33 +67,33 @@ class IA:
             # Obtém a quantidade de exércitos na província
             province_army_count = kwargs.get("province").get_armys()
             army_province_ratio = 1 / (1 + province_army_count)
-            
+
             # Calcula a saúde do exército na província
             province_army_health = kwargs.get("province_army_health")
             province_army_max_health = kwargs.get("province_army_max_health")
             army_health_ratio = province_army_health / province_army_max_health
-            
+
             # Obtém a quantidade de exércitos aliados na província
             allied_army_count = kwargs.get("province_allied_armys_quant")
             allied_army_ratio = 1 / (1 + allied_army_count)
-            
+
             # Verifica se a província está em batalha
             in_battle = kwargs.get("province").get_in_battle()
             battle_modifier = 0.5 if in_battle else 0.0
-            
+
             # Verifica se não há exércitos na província
             province_army_quantity = kwargs.get("province_armys_quant")
             no_army_modifier = 1.0 if province_army_quantity == 0 else 0.0
-            
+
             # Calcula o peso base
             base_weight = (
-                (army_province_ratio / 10) +
-                army_health_ratio +
-                (allied_army_ratio / 10) +
-                battle_modifier +
-                no_army_modifier
+                (army_province_ratio / 10)
+                + army_health_ratio
+                + (allied_army_ratio / 10)
+                + battle_modifier
+                + no_army_modifier
             )
-            
+
             return base_weight
 
         def calc_enemy_modifier(**kwargs) -> float:
@@ -107,9 +107,15 @@ class IA:
             # Calcula os modificadores individuais
             defense_modifier = 1 - province.get_defence_modifier()
             army_defence_value = province_army_defence / 100
-            attack_defence_modifier = (allied_army.get_attack() / province_army_defence) / 10
-            attack_health_modifier = (allied_army.get_health() / province_army_health) / 10
-            army_quant_modifier = (allied_army.get_army_quant() / province_army_quant) / 10
+            attack_defence_modifier = (
+                allied_army.get_attack() / province_army_defence
+            ) / 10
+            attack_health_modifier = (
+                allied_army.get_health() / province_army_health
+            ) / 10
+            army_quant_modifier = (
+                allied_army.get_army_quant() / province_army_quant
+            ) / 10
             terrain_modifier = 1 - province.get_terrain().get_defence_modifier()
 
             # Soma todos os modificadores para obter o valor final
@@ -120,6 +126,42 @@ class IA:
                 + attack_health_modifier
                 + army_quant_modifier
                 + terrain_modifier
+            )
+
+            return total_modifier
+
+        def calc_ally_modifier(**kwargs) -> float:
+            # Obtém os modificadores e valores necessários dos argumentos
+            province = kwargs.get("province")
+            province_allied_army_defence = kwargs.get("province_allied_army_defence")
+            province_allied_armys_quant = kwargs.get("province_allied_armys_quant")
+            province_allied_army_health = kwargs.get("province_allied_army_health")
+            province_allied_max_health = kwargs.get("province_allied_max_health")
+            province_armys_quant = kwargs.get("province_armys_quant")
+            owner = province.get_owner()
+
+            # Calcula os modificadores individuais
+            defense_modifier = (1 - province.get_defence_modifier()) / 3
+            allied_defence_modifier = 1 / (1 + province_allied_army_defence) / 10
+            allied_armys_quant_modifier = 1 / (1 + province_allied_armys_quant) / 10
+            allied_health_modifier = 1 - (
+                1 - (province_allied_army_health / province_allied_max_health)
+            )
+            terrain_modifier = (1 - province.get_terrain()) / 3
+            army_size_comparer_modifier = (
+                0.3
+                if army_province_verifier(province_armys_quant, province, owner)
+                else 0.00
+            )
+
+            # Soma todos os modificadores para obter o valor final
+            total_modifier = (
+                defense_modifier
+                + allied_defence_modifier
+                + allied_armys_quant_modifier
+                + allied_health_modifier
+                + terrain_modifier
+                + army_size_comparer_modifier
             )
 
             return total_modifier
@@ -164,15 +206,13 @@ class IA:
 
                 value = 1 + base_weight + enemy_province_weight
             else:
-                allied_province_weight = (
-                    ((1 - province.get_defence_modifier()) / 3)
-                    + (1 / (1 + province_allied_army_defence) / 10)
-                    + (1 / (1 + province_allied_armys_quant) / 10)
-                    + (1 - (province_allied_army_health / province_allied_max_health))
-                    + ((1 - province.get_terrain()) / 3)
-                    + army_size_comparer_modifier
-                    if army_province_verifier(province_armys_quant, province, owner)
-                    else 0.00
+                allied_province_weight = calc_ally_modifier(
+                    province=province,
+                    province_allied_army_defence=province_allied_army_defence,
+                    province_allied_armys_quant=province_allied_armys_quant,
+                    province_allied_army_health=province_allied_army_health,
+                    province_allied_max_health=province_allied_max_health,
+                    province_armys_quant=province_armys_quant,
                 )
 
                 value = 1 + base_weight + allied_province_weight

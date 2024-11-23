@@ -12,7 +12,8 @@ class Province:
         self.dom_turns = 0
         self.create_army_requisition = 1
 
-        self.level_defence_modifiers = {1: 1.0, 2: 1.5, 3: 1.6, 4: 1.75, 5: 1.9}
+        self.level_defence_modifiers = {
+            1: 1.0, 2: 1.5, 3: 1.6, 4: 1.75, 5: 1.9}
 
     def upgrade(self):
         if self.level < self.level_cap:

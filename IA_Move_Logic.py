@@ -208,7 +208,7 @@ class IA_Move_Logic():
             # Verifica se a quantidade de exércitos na província atual é maior que a de qualquer província vizinha
             enemy_army_quantities = get_enemy_army_quantities(province, owner)
             army_size_comparer_modifier = 0.3 if has_larger_army(
-                province_armys_quant, enemy_army_quantities) else 0.0
+                province_allied_armys_quant, enemy_army_quantities) else 0.0
 
             # Soma todos os modificadores para obter o valor final
             total_modifier = (
@@ -299,6 +299,7 @@ class IA_Move_Logic():
 
         for province in neighbors:
             current_value = sum_val(province, army)
+            print(self.player.get_player_name(), province.get_name(), current_value)
             if current_value > max_val:
                 max_val = current_value
                 best_province = province

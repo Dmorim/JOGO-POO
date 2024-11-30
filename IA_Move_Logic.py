@@ -2,11 +2,12 @@
 class IA_Move_Logic():
     _instance = None  # Instância única da classe
 
-    def __new__(cls, *args, **kwargs):  # Garante que a classe seja instanciada apenas uma vez
+    """def __new__(cls, *args, **kwargs):  # Garante que a classe seja instanciada apenas uma vez
         if not cls._instance:
             cls._instance = super(IA_Move_Logic, cls).__new__(
                 cls)  # Cria a instância da classe
         return cls._instance  # Retorna a instância da classe
+"""
 
     def __init__(self, player) -> None:  # Construtor da classe
         self.player = player  # Define o jogador
@@ -179,7 +180,7 @@ class IA_Move_Logic():
 
             def has_larger_army(army_quantity, enemy_army_quantities):
                 """Verifica se a quantidade de exércitos na província atual é maior que a de qualquer província vizinha."""
-                return any(army_quantity > enemy_quantity for enemy_quantity in enemy_army_quantities)
+                return any(army_quantity > enemy_quantity for enemy_quantity in enemy_army_quantities if enemy_army_quantities != [])
 
             # Obtém os modificadores e valores necessários dos argumentos
             province = kwargs.get("province")
@@ -299,7 +300,8 @@ class IA_Move_Logic():
 
         for province in neighbors:
             current_value = sum_val(province, army)
-            print(self.player.get_player_name(), province.get_name(), current_value)
+            print(self.player.get_player_name(),
+                  province.get_name(), current_value)
             if current_value > max_val:
                 max_val = current_value
                 best_province = province

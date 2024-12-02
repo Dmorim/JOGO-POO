@@ -12,6 +12,20 @@ class IA_Move_Logic():
     def __init__(self, player) -> None:  # Construtor da classe
         self.player = player  # Define o jogador
 
+    def neighbor_threat_armies(self, army):
+        current_province = army.get_province()
+        if current_province is None:
+            return False
+
+        neighbors = current_province.get_neighbors()
+        for province in neighbors:
+            if province.get_owner() != self.player:
+                for enemy_army in province.get_armys():
+                    if enemy_army.get_owner() != self.player:
+                        if enemy_army.get_army_quant() > army.get_army_quant():
+                            return True
+        return False
+
     def get_army_value(self, army_list):
         """
         Avalia uma lista de exércitos e retorna o exército com o maior valor calculado.
@@ -66,8 +80,11 @@ class IA_Move_Logic():
                 (army.get_health() / army.get_max_health())
             army_stats_modifier = (army.get_attack() + army.get_defense()) / 10
             army_size_modifier = 1 / (1 - (army_quant / 100)) / 10
+            army_threat_modifier = 0.25 if not self.neighbor_threat_armies(
+                army) else 0
             calc_val = (
-                0 - army_health_modifier + army_stats_modifier + army_size_modifier
+                0 - army_health_modifier + army_stats_modifier +
+                army_size_modifier + army_threat_modifier
             )
             return calc_val
 

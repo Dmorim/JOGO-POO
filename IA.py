@@ -32,8 +32,8 @@ class IA:
                         province, mov_val = self.move_logic.get_province_value(
                             (self.move_logic.get_army_value(armys))
                         )
-                        # print(self.player.get_player_name(),
-                        # province.get_name(), mov_val)
+                        print(self.player.get_player_name(),
+                              province.get_name(), mov_val)
 
     def act_do(self):
         self.act_choose()

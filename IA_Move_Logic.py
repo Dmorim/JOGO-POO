@@ -78,13 +78,14 @@ class IA_Move_Logic():
 
             army_health_modifier = 1 - \
                 (army.get_health() / army.get_max_health())
-            army_stats_modifier = (army.get_attack() + army.get_defense()) / 10
+            army_stats_modifier = (army.get_attack() +
+                                   army.get_defense()) / 100
             army_size_modifier = 1 / (1 - (army_quant / 100)) / 10
-            army_threat_modifier = 0.25 if not self.neighbor_threat_armies(
+            army_threat_modifier = (0.10 + (0.010 * army_quant)) if self.neighbor_threat_armies(
                 army) else 0
             calc_val = (
                 0 - army_health_modifier + army_stats_modifier +
-                army_size_modifier + army_threat_modifier
+                army_size_modifier - army_threat_modifier
             )
             return calc_val
 
@@ -101,46 +102,29 @@ class IA_Move_Logic():
 
     def get_province_value(self, army):
         """
-        Essa função avalia as provincias vizinhas da localidade do exército selecionado.
-        Seus parametros diferem caso a provincia seja aliada ou inimiga.
+        Avalia as províncias vizinhas da localização do exército selecionado.
+        Os parâmetros diferem caso a província seja aliada ou inimiga.
         Os modificadores que interferem na decisão da IA são:
             - Quantidade de exércitos na província.
             - Saúde dos exércitos na província.
             - Estatísticas dos exércitos na província.
 
-        A função contém funções internas que são responsáveis por fazer o cálculo enquanto a função principal organiza e retorna a com maior valor
+        A função contém funções internas que são responsáveis por fazer o cálculo enquanto a função principal organiza e retorna a com maior valor.
 
         Args:
             army (object): Instância de Army.
 
         Retorna:
             object: O objeto de província com o maior valor calculado.
-
         """
 
-        def calc_base_weight(**kwargs) -> float:
-            # Obtém a quantidade de exércitos na província
-            province_army_count = len(kwargs.get("province").get_armys())
-            army_province_ratio = 1 / (1 + province_army_count)
-
-            # Calcula a saúde do exército na província
-            province_army_health = kwargs.get("province_army_health")
-            province_army_max_health = kwargs.get("province_army_max_health")
+        def calc_base_weight(province, province_army_health, province_army_max_health, province_armys_quant, province_allied_armys_quant) -> float:
+            army_province_ratio = 1 / (1 + len(province.get_armys()))
             army_health_ratio = province_army_health / province_army_max_health
+            allied_army_ratio = 1 / (1 + province_allied_armys_quant)
+            battle_modifier = 0.5 if province.get_in_battle() else 0.0
+            no_army_modifier = 1.0 if province_armys_quant == 0 else 0.0
 
-            # Obtém a quantidade de exércitos aliados na província
-            allied_army_count = kwargs.get("province_allied_armys_quant")
-            allied_army_ratio = 1 / (1 + allied_army_count)
-
-            # Verifica se a província está em batalha
-            battle_modifier = 0.5 if kwargs.get(
-                "province").get_in_battle() else 0.0
-
-            # Verifica se não há exércitos na província
-            no_army_modifier = 1.0 if kwargs.get(
-                "province_armys_quant") == 0 else 0.0
-
-            # Calcula o peso base
             base_weight = (
                 (army_province_ratio / 10)
                 + army_health_ratio
@@ -151,29 +135,14 @@ class IA_Move_Logic():
 
             return base_weight
 
-        def calc_enemy_modifier(**kwargs) -> float:
-            # Obtém os modificadores e valores necessários dos argumentos
-            province = kwargs.get("province")
-            province_army_defence = kwargs.get("province_army_defence")
-            province_army_health = kwargs.get("province_army_health")
-            province_army_quant = kwargs.get("province_army_quant")
-            allied_army = kwargs.get("allied_army")
-
-            # Calcula os modificadores individuais
+        def calc_enemy_modifier(province, province_army_defence, province_army_health, province_army_quant, allied_army) -> float:
             defense_modifier = 1 - province.get_defence_modifier()
             army_defence_value = province_army_defence / 100
-            attack_defence_modifier = (
-                allied_army.get_attack() / province_army_defence
-            ) / 10
-            attack_health_modifier = (
-                allied_army.get_health() / province_army_health
-            ) / 10
-            army_quant_modifier = (
-                allied_army.get_army_quant() / province_army_quant
-            ) / 10
+            attack_defence_modifier = (allied_army.get_attack() / province_army_defence) / 10
+            attack_health_modifier = (allied_army.get_health() / province_army_health) / 10
+            army_quant_modifier = (allied_army.get_army_quant() / province_army_quant) / 10
             terrain_modifier = 1 - province.get_terrain().get_defence_modifier()
 
-            # Soma todos os modificadores para obter o valor final
             total_modifier = (
                 defense_modifier
                 + army_defence_value
@@ -185,9 +154,8 @@ class IA_Move_Logic():
 
             return total_modifier
 
-        def calc_ally_modifier(**kwargs) -> float:
+        def calc_ally_modifier(province, province_allied_army_defence, province_allied_armys_quant, province_allied_army_health, province_allied_max_health, province_armys_quant) -> float:
             def get_enemy_army_quantities(province, owner):
-                """Retorna uma lista com a quantidade de exércitos nas províncias vizinhas que não pertencem ao mesmo dono."""
                 return [
                     army.get_army_quant()
                     for neighbor in province.get_neighbors()
@@ -196,39 +164,18 @@ class IA_Move_Logic():
                 ]
 
             def has_larger_army(army_quantity, enemy_army_quantities):
-                """Verifica se a quantidade de exércitos na província atual é maior que a de qualquer província vizinha."""
-                return any(army_quantity > enemy_quantity for enemy_quantity in enemy_army_quantities if enemy_army_quantities != [])
+                return any(army_quantity > enemy_quantity for enemy_quantity in enemy_army_quantities)
 
-            # Obtém os modificadores e valores necessários dos argumentos
-            province = kwargs.get("province")
-            province_allied_army_defence = kwargs.get(
-                "province_allied_army_defence")
-            province_allied_armys_quant = kwargs.get(
-                "province_allied_armys_quant")
-            province_allied_army_health = kwargs.get(
-                "province_allied_army_health")
-            province_allied_max_health = kwargs.get(
-                "province_allied_max_health")
-            province_armys_quant = kwargs.get("province_armys_quant")
             owner = province.get_owner()
-
-            # Calcula os modificadores individuais
             defense_modifier = (1 - province.get_defence_modifier()) / 3
-            allied_defence_modifier = 1 / \
-                (1 + province_allied_army_defence) / 10
-            allied_armys_quant_modifier = 1 / \
-                (1 + province_allied_armys_quant) / 10
-            allied_health_modifier = 1 - \
-                (1 - (province_allied_army_health / province_allied_max_health))
-            terrain_modifier = (
-                1 - province.get_terrain().get_defence_modifier()) / 3
+            allied_defence_modifier = 1 / (1 + province_allied_army_defence) / 10
+            allied_armys_quant_modifier = 1 / (1 + province_allied_armys_quant) / 10
+            allied_health_modifier = 1 - (1 - (province_allied_army_health / province_allied_max_health))
+            terrain_modifier = (1 - province.get_terrain().get_defence_modifier()) / 3
 
-            # Verifica se a quantidade de exércitos na província atual é maior que a de qualquer província vizinha
             enemy_army_quantities = get_enemy_army_quantities(province, owner)
-            army_size_comparer_modifier = 0.3 if has_larger_army(
-                province_allied_armys_quant, enemy_army_quantities) else 0.0
+            army_size_comparer_modifier = 0.3 if has_larger_army(province_allied_armys_quant, enemy_army_quantities) else 0.0
 
-            # Soma todos os modificadores para obter o valor final
             total_modifier = (
                 defense_modifier
                 + allied_defence_modifier
@@ -241,44 +188,23 @@ class IA_Move_Logic():
             return total_modifier
 
         def sum_val(province, allied_army):
-            def army_health(army, comparer):
-                total_health = 0
-                actual_health = 0
-                for armies in army:
-                    if armies.get_owner() == comparer:
-                        total_health += armies.get_max_health()
-                        actual_health += armies.get_health()
+            def army_health(army, owner):
+                total_health = sum(armies.get_max_health() for armies in army if armies.get_owner() == owner)
+                actual_health = sum(armies.get_health() for armies in army if armies.get_owner() == owner)
                 return actual_health, total_health
 
-            def defence_val(army, comparer):
-                defence_value = 0
-                for armies in army:
-                    if armies.get_owner() == comparer:
-                        defence_value += armies.get_defense()
-                return defence_value
+            def defence_val(army, owner):
+                return sum(armies.get_defense() for armies in army if armies.get_owner() == owner)
 
             owner = province.get_owner()
             province_army = province.get_armys()
 
-            province_army_health, province_army_max_health = army_health(
-                province_army, owner
-            )
-            province_allied_army_health, province_allied_max_health = army_health(
-                province_army, self.player
-            )
-            province_armys_quant = sum(
-                army.get_army_quant()
-                for army in province.get_armys()
-                if army.get_owner() != self.player
-            )
-            province_allied_armys_quant = sum(
-                army.get_army_quant()
-                for army in province.get_armys()
-                if army.get_owner() == self.player
-            )
+            province_army_health, province_army_max_health = army_health(province_army, owner)
+            province_allied_army_health, province_allied_max_health = army_health(province_army, self.player)
+            province_armys_quant = sum(army.get_army_quant() for army in province.get_armys() if army.get_owner() != self.player)
+            province_allied_armys_quant = sum(army.get_army_quant() for army in province.get_armys() if army.get_owner() == self.player)
             province_army_defence = defence_val(province_army, owner)
-            province_allied_army_defence = defence_val(
-                province_army, self.player)
+            province_allied_army_defence = defence_val(province_army, self.player)
 
             base_weight = calc_base_weight(
                 province=province,
@@ -287,6 +213,7 @@ class IA_Move_Logic():
                 province_armys_quant=province_armys_quant,
                 province_allied_armys_quant=province_allied_armys_quant
             )
+
             if owner != self.player:
                 enemy_province_weight = calc_enemy_modifier(
                     province=province,
@@ -295,7 +222,6 @@ class IA_Move_Logic():
                     province_army_quant=province_armys_quant,
                     province_army_health=province_army_health,
                 )
-
                 value = 1 + base_weight + enemy_province_weight
             else:
                 allied_province_weight = calc_ally_modifier(
@@ -306,21 +232,19 @@ class IA_Move_Logic():
                     province_allied_max_health=province_allied_max_health,
                     province_armys_quant=province_armys_quant,
                 )
-
                 value = 1 + base_weight + allied_province_weight
 
             return value
 
         neighbors = army.get_province().get_neighbors()
-        max_val: float = float("-inf")
-        best_province: object = None
+        max_value = float("-inf")
+        best_province = None
 
         for province in neighbors:
             current_value = sum_val(province, army)
-            print(self.player.get_player_name(),
-                  province.get_name(), current_value)
-            if current_value > max_val:
-                max_val = current_value
+            print(self.player.get_player_name(), province.get_name(), current_value)
+            if current_value > max_value:
+                max_value = current_value
                 best_province = province
 
-        return best_province, max_val
+        return best_province, max_value

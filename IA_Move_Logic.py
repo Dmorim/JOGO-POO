@@ -17,13 +17,20 @@ class IA_Move_Logic():
         if current_province is None:
             return False
 
+        allied_province = True
+
         neighbors = current_province.get_neighbors()
         for province in neighbors:
             if province.get_owner() != self.player:
+                allied_province = False
                 for enemy_army in province.get_armys():
                     if enemy_army.get_owner() != self.player:
                         if enemy_army.get_army_quant() > army.get_army_quant():
                             return True
+
+        if allied_province:
+            return True
+
         return False
 
     def get_army_value(self, army_list):
@@ -94,13 +101,12 @@ class IA_Move_Logic():
 
         for army in army_list:  # Itera sobre a lista de exércitos
             current_value = sum_val(army)  # Calcula o valor do exército
+
             if current_value > max_val:  # Verifica se o valor calculado é maior que o valor máximo
                 max_val = current_value  # Define o valor máximo como o valor calculado
-                best_army = army  # Define o melhor exército como o exército atual
-
-        print(best_army.get_province().get_name(),
-              best_army.get_owner().get_player_name())
+                best_army = army  # Define o melhor exército como o exército atual)
         # Retorna o melhor exército
+        print(best_army.get_province().get_name(), max_val)
         return best_army
 
     def get_province_value(self, army):
@@ -261,8 +267,6 @@ class IA_Move_Logic():
 
         for province in neighbors:
             current_value = sum_val(province, army)
-            print(self.player.get_player_name(),
-                  province.get_name(), current_value)
             if current_value > max_value:
                 max_value = current_value
                 best_province = province

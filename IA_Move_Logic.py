@@ -59,6 +59,8 @@ class IA_Move_Logic():
                     A IA terá prioridade para escolher exércitos com estatísticas mais altas. A divisão por 10 é para reduzir o peso do modificador.
                 - Modificador de quantidade = O inverso da quantidade do exército dividido por 100 dividido por 10.
                     A IA terá prioridade para escolher exércitos com maior quantidade. O modificador é dividido para evitar que a quantidade tenha uma progressão de influência muito alta.
+                - Modificador de ameaça = 0.05 + Escalamento com a quantidade de exércitos na província.
+                    Esse modificador é ativado quando o exército está vizinho a uma provicia inimica com maior quantidade de exércitos que o próprio, evitando a IA de mover exércitos ameaçados e dando prioridade para aqueles que podem reforçar o local.
             Args:
                 army (object): Instância de Army.
 
@@ -132,15 +134,40 @@ class IA_Move_Logic():
         """
 
         def calc_base_weight(province, province_army_health, province_army_max_health, province_allied_armys_quant) -> float:
+            """Essa função calcula o valor base de uma província com base nas estatíscias de exércitos presentes nela
+            e em modificadores estacionarios situacionais.
+
+            Args:
+                province (Object): Instânca da provincia analisada
+                province_army_health (Integer): Vida atual dos exércitos localizados na província
+                province_army_max_health (Integer): Vida máxima dos exércitos localizados na província
+                province_allied_armys_quant (Integer): Quantidade de exércitos aliados na província
+
+            Returns:
+                float: Valor base da província
+            """
+
+            # Razão do total de ezércitos na provícia
             army_ratio = 1 / (1 + sum(army.get_army_quant(
             ) for army in province.get_armys()))
+
+            # Razão da vida dos exércitos na província
             army_health_ratio = province_army_health / province_army_max_health
+
+            # Razão dos exércitos aliados na província
             allied_army_ratio = 1 / (1 + sum(army.get_army_quant(
             ) for army in province.get_armys() if army.get_owner() == self.player))
+
+            # Média das razões dos exércitos
             armys_ratio = (army_ratio + allied_army_ratio) / 2
+
+            # Modificador de batalha
             battle_modifier = 0.3 if province.get_in_battle() else 0.0
+
+            # Modificador de provincia vazia
             no_army_modifier = 1.0 if province_allied_armys_quant == 0 else 0.0
 
+            # Peso base da província
             base_weight = (
                 (armys_ratio / 10)
                 + army_health_ratio
@@ -151,6 +178,19 @@ class IA_Move_Logic():
             return base_weight
 
         def calc_enemy_modifier(province, province_army_defence, province_army_health, province_army_quant, allied_army) -> float:
+            """_summary_
+
+            Args:
+                province (_type_): _description_
+                province_army_defence (_type_): _description_
+                province_army_health (_type_): _description_
+                province_army_quant (_type_): _description_
+                allied_army (_type_): _description_
+
+            Returns:
+                float: _description_
+            """
+
             defense_modifier = 1 - province.get_defence_modifier()
             army_defence_value = province_army_defence / 100
             attack_defence_modifier = (
@@ -185,7 +225,7 @@ class IA_Move_Logic():
                 return any(army_quantity > enemy_quantity for enemy_quantity in enemy_army_quantities)
 
             owner = province.get_owner()
-            defense_modifier = (0.99 - province.get_defence_modifier()) / 3
+            defense_modifier = (1 - province.get_defence_modifier()) / 3
             allied_defence_modifier = 1 / \
                 (1 + province_allied_army_defence) / 10
             allied_armys_quant_modifier = 1 / \

@@ -1,13 +1,5 @@
 # Classe responsável pela lógica de movimentação da IA
 class IA_Move_Logic():
-    _instance = None  # Instância única da classe
-
-    """def __new__(cls, *args, **kwargs):  # Garante que a classe seja instanciada apenas uma vez
-        if not cls._instance:
-            cls._instance = super(IA_Move_Logic, cls).__new__(
-                cls)  # Cria a instância da classe
-        return cls._instance  # Retorna a instância da classe
-"""
 
     def __init__(self, player) -> None:  # Construtor da classe
         self.player = player  # Define o jogador
@@ -17,19 +9,13 @@ class IA_Move_Logic():
         if current_province is None:
             return False
 
-        allied_province = True
-
         neighbors = current_province.get_neighbors()
         for province in neighbors:
             if province.get_owner() != self.player:
-                allied_province = False
                 for enemy_army in province.get_armys():
                     if enemy_army.get_owner() != self.player:
                         if enemy_army.get_army_quant() > army.get_army_quant():
                             return True
-
-        if allied_province:
-            return True
 
         return False
 
@@ -80,16 +66,35 @@ class IA_Move_Logic():
                 calc_val: float: Resultado do cálculo do valor do exército.
             """
 
+            # Define o valor de 100 para balanceamento dos valores calculados
+            percent = 100
+
+            # Valores atribuidos a saúde do exército
+            ratio_of_health = (army.get_health() / army.get_max_health())
+
+            # Valores atribuidos de ataque e defesa do exército
+            sum_of_army_stats = army.get_attack() + army.get_defense()
+            mean_of_army_stats = (sum_of_army_stats / 2)
+            modifier_of_army_stats = 0.25
+
+            # Valores atribuidos a quantidade do exército
             army_quant = army.get_army_quant() if army.get_army_quant(
             ) != 100 else 101  # Evita divisão por zero
 
-            army_health_modifier = 1 - \
-                (army.get_health() / army.get_max_health())
-            army_stats_modifier = (army.get_attack() +
-                                   army.get_defense()) / 100
-            army_size_modifier = 1 / (1 - (army_quant / 100)) / 10
-            army_threat_modifier = (0.10 + (0.010 * army_quant)) if self.neighbor_threat_armies(
+            # Modificadores a serem calculados
+            army_health_modifier = 1 - ratio_of_health  # Modificador de saúde
+
+            army_stats_modifier = (sum_of_army_stats +  # Modificador de estatísticas
+                                   (mean_of_army_stats * modifier_of_army_stats)) / percent
+
+            # Modificador de tamanho de exército
+            army_size_modifier = 1 / (1 - (army_quant / percent)) / 10
+
+            # Modificador de ameaça de exército
+            army_threat_modifier = (0.05 + (0.010 * army_quant)) if self.neighbor_threat_armies(
                 army) else 0
+
+            # Calcula o valor do exército
             calc_val = (
                 0 - army_health_modifier + army_stats_modifier +
                 army_size_modifier - army_threat_modifier
@@ -106,7 +111,6 @@ class IA_Move_Logic():
                 max_val = current_value  # Define o valor máximo como o valor calculado
                 best_army = army  # Define o melhor exército como o exército atual)
         # Retorna o melhor exército
-        print(best_army.get_province().get_name(), max_val)
         return best_army
 
     def get_province_value(self, army):

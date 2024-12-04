@@ -178,29 +178,41 @@ class IA_Move_Logic():
             return base_weight
 
         def calc_enemy_modifier(province, province_army_defence, province_army_health, province_army_quant, allied_army) -> float:
-            """_summary_
+            """Essa função calcula o valor de uma província caso seja inimiga.
 
             Args:
-                province (_type_): _description_
-                province_army_defence (_type_): _description_
-                province_army_health (_type_): _description_
-                province_army_quant (_type_): _description_
-                allied_army (_type_): _description_
+                province (object): Provincia usada
+                province_army_defence (float): Pontuação de defesa dos exércitos na província
+                province_army_health (float): Pontuação de vida dos exércitos na província
+                province_army_quant (integer): Pontuação de quantidade dos exércitos na província
+                allied_army (object): Exército aliado
 
             Returns:
-                float: _description_
+                float: Valor calculado
             """
 
+            # Modificador de defesa
             defense_modifier = 1 - province.get_defence_modifier()
+
+            # Valor de defesa dos exércitos na província
             army_defence_value = province_army_defence / 100
+
+            # Modificador de ataque e defesa
             attack_defence_modifier = (
                 allied_army.get_attack() / province_army_defence) / 10
+
+            # Modificador de vida
             attack_health_modifier = (
                 allied_army.get_health() / province_army_health) / 10
+
+            # Modificador de quantidade de exércitos
             army_quant_modifier = (
                 allied_army.get_army_quant() / province_army_quant) / 10
+
+            # Modificador de terreno
             terrain_modifier = 1 - province.get_terrain().get_defence_modifier()
 
+            # Calcula o valor total
             total_modifier = (
                 defense_modifier
                 + army_defence_value
@@ -213,7 +225,27 @@ class IA_Move_Logic():
             return total_modifier
 
         def calc_ally_modifier(province, province_allied_army_defence, province_allied_armys_quant, province_allied_army_health, province_allied_max_health, province_armys_quant) -> float:
+            """_summary_
+
+            Args:
+                province (_type_): _description_
+                province_allied_army_defence (_type_): _description_
+                province_allied_armys_quant (_type_): _description_
+                province_allied_army_health (_type_): _description_
+                province_allied_max_health (_type_): _description_
+                province_armys_quant (_type_): _description_
+
+            Returns:
+                float: _description_
+            """
+
             def get_enemy_army_quantities(province, owner):
+                """_summary_
+
+                Returns:
+                    _type_: _description_
+                """
+
                 return [
                     army.get_army_quant()
                     for neighbor in province.get_neighbors()
@@ -222,6 +254,16 @@ class IA_Move_Logic():
                 ]
 
             def has_larger_army(army_quantity, enemy_army_quantities):
+                """_summary_
+
+                Args:
+                    army_quantity (_type_): _description_
+                    enemy_army_quantities (_type_): _description_
+
+                Returns:
+                    _type_: _description_
+                """
+
                 return any(army_quantity > enemy_quantity for enemy_quantity in enemy_army_quantities)
 
             owner = province.get_owner()

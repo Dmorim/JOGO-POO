@@ -1,6 +1,6 @@
 import random
 
-from IA_Move_Logic import IA_Move_Logic
+from IA.IA_Move_Logic import IA_Move_Logic
 
 
 class IA:

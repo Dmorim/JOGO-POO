@@ -5,18 +5,40 @@ class IA_Move_Logic():
         self.player = player  # Define o jogador
 
     def neighbor_threat_armies(self, army):
+        """
+        Verifica se o exército está em ameaça por exércitos inimigos com mais quantidade.
+
+        Args:
+            army (Object): E exército a ser analisado.
+
+        Returns:
+            Boolean: Verdadeiro se o exército estiver em ameaça, falso caso contrário.
+        """
+
+        # Define a província atual do exército
         current_province = army.get_province()
+
+        # Verifica se a província atual do exército é nula
         if current_province is None:
             return False
 
+        # Define as províncias vizinhas da província atual do exército
         neighbors = current_province.get_neighbors()
+
+        # Itera sobre as províncias vizinhas
         for province in neighbors:
+            # Verifica se a província é inimiga
             if province.get_owner() != self.player:
+                # Itera sobre os exércitos na província
                 for enemy_army in province.get_armys():
+                    # Verifica se o exército é inimigo
                     if enemy_army.get_owner() != self.player:
+                        # Verifica se a quantidade de exércitos inimigos é maior que a quantidade do exército
                         if enemy_army.get_army_quant() > army.get_army_quant():
+                            # Retorna verdadeiro se o exército estiver em ameaça
                             return True
 
+        # Retorna falso se o exército não estiver em ameaça
         return False
 
     def get_army_value(self, army_list):
@@ -225,28 +247,32 @@ class IA_Move_Logic():
             return total_modifier
 
         def calc_ally_modifier(province, province_allied_army_defence, province_allied_armys_quant, province_allied_army_health, province_allied_max_health, province_armys_quant) -> float:
-            """_summary_
+            """
+            Calcula o valor de uma província aliada.
 
             Args:
-                province (_type_): _description_
-                province_allied_army_defence (_type_): _description_
-                province_allied_armys_quant (_type_): _description_
-                province_allied_army_health (_type_): _description_
-                province_allied_max_health (_type_): _description_
-                province_armys_quant (_type_): _description_
+                province (Object): Província analisada
+                province_allied_army_defence (float): Valor de defesa dos exércitos aliados na província
+                province_allied_armys_quant (integer): Quantidade de exércitos aliados na província
+                province_allied_army_health (float): Vida dos exércitos aliados na província
+                province_allied_max_health (float): Vida máxima dos exércitos aliados na província
+                province_armys_quant (integer): Quantidade de exércitos na província
 
             Returns:
-                float: _description_
+                float: Valor calculado
             """
 
             def get_enemy_army_quantities(province, owner):
-                """_summary_
+                """
+                Função interna que retorna a quantidade de exércitos inimigos nas províncias vizinhas.
 
                 Returns:
-                    _type_: _description_
+                    province (Objetct): Província analisada
+                    owner (Object): Dono da província
                 """
 
                 return [
+                    # Retorna uma lista com as quantidades de exércitos inimigos em províncias vizinhas
                     army.get_army_quant()
                     for neighbor in province.get_neighbors()
                     if neighbor.get_owner() != owner and neighbor.get_armys()
@@ -254,33 +280,50 @@ class IA_Move_Logic():
                 ]
 
             def has_larger_army(army_quantity, enemy_army_quantities):
-                """_summary_
+                """
+                Função interna que verifica se o exército aliado é maior que os exércitos inimigos.
 
                 Args:
-                    army_quantity (_type_): _description_
-                    enemy_army_quantities (_type_): _description_
+                    army_quantity (integer): Quantidade de exércitos aliados
+                    enemy_army_quantities (List): Lista com as quantidades de exércitos inimigos
 
                 Returns:
-                    _type_: _description_
+                    Boolean: Verdadeiro se o exército aliado for maior que os inimigos, falso caso contrário
                 """
 
+                # Verifica se a quantidade de exércitos aliados é maior que a quantidade de exércitos inimigos
                 return any(army_quantity > enemy_quantity for enemy_quantity in enemy_army_quantities)
 
+            # Define o dono da província
             owner = province.get_owner()
+
+            # Valor do modificador de defesa -por nível- da província
             defense_modifier = (1 - province.get_defence_modifier()) / 3
+
+            # Razão da estatística de defesa dos exércitos aliados na província
             allied_defence_modifier = 1 / \
                 (1 + province_allied_army_defence) / 10
+
+            # Razão da quantidade de exércitos aliados na província
             allied_armys_quant_modifier = 1 / \
                 (1 + province_allied_armys_quant) / 10
+
+            # Razão da vida dos exércitos aliados na província
             allied_health_modifier = 1 - \
                 (1 - (province_allied_army_health / province_allied_max_health))
+
+            # Modificador de defesa do terreno da província
             terrain_modifier = (
                 1 - province.get_terrain().get_defence_modifier()) / 3
 
+            # Variável que armazena a lista com as quantidades de exércitos inimigos nas províncias vizinhas
             enemy_army_quantities = get_enemy_army_quantities(province, owner)
+
+            # Modificador de comparação de tamanho de exércitos
             army_size_comparer_modifier = 0.3 if has_larger_army(
                 province_allied_armys_quant, enemy_army_quantities) else 0.0
 
+            # Calcula o valor total
             total_modifier = (
                 defense_modifier
                 + allied_defence_modifier
@@ -290,34 +333,86 @@ class IA_Move_Logic():
                 + army_size_comparer_modifier
             )
 
+            # Retorna o valor calculado
             return total_modifier
 
         def sum_val(province, allied_army):
+            """
+            Função responsável por obter os valores a serem usados nos cáculos de valor da província, chamar a função
+            correta de acordo com o dono da província e retornar o valor final.
+
+            Args:
+                province (Object): Província analisada
+                allied_army (Object): Exército aliado
+
+            Returns:
+                float: Valor calculado
+            """
+
             def army_health(army, owner):
+                """
+                Função interna que calcula a vida total e a vida atual dos exércitos na província.
+
+                Args:
+                    army (Object): Exércitos na província
+                    owner (Object): Dono da província
+
+                Returns:
+                    float: Vida atual e máxima dos exércitos na província
+                """
+
+                # Calcula a vida total e a vida atual dos exércitos na província
                 total_health = sum(armies.get_max_health()
                                    for armies in army if armies.get_owner() == owner)
                 actual_health = sum(armies.get_health()
                                     for armies in army if armies.get_owner() == owner)
+
+                # Retorna a vida atual e a vida total
                 return actual_health, total_health
 
             def defence_val(army, owner):
+                """
+                Função interna que calcula a defesa total dos exércitos na província.
+
+                Args:
+                    army (Object): Exércitos na província
+                    owner (Object): Dono da província
+
+                Returns:
+                    int: Valor de defesa total
+                """
                 return sum(armies.get_defense() for armies in army if armies.get_owner() == owner)
 
+            # Define o dono da província
             owner = province.get_owner()
+
+            # Define os exércitos na província
             province_army = province.get_armys()
 
+            # Calcula a vida total e a vida atual dos exércitos na província
             province_army_health, province_army_max_health = army_health(
-                province_army, owner)
+                province_army, self.player)
+
+            # Calcula a quantidade de exércitos na província
             province_allied_army_health, province_allied_max_health = army_health(
                 province_army, self.player)
+
+            # Calcula a quantidade de exércitos inimigos na província
             province_armys_quant = sum(army.get_army_quant(
             ) for army in province.get_armys() if army.get_owner() != self.player)
+
+            # Calcula a quantidade de exércitos aliados na província
             province_allied_armys_quant = sum(army.get_army_quant(
             ) for army in province.get_armys() if army.get_owner() == self.player)
+
+            # Calcula a defesa dos exércitos na província
             province_army_defence = defence_val(province_army, owner)
+
+            # Calcula a defesa dos exércitos aliados na província
             province_allied_army_defence = defence_val(
                 province_army, self.player)
 
+            # Calcula o valor base da província
             base_weight = calc_base_weight(
                 province=province,
                 province_army_health=province_army_health,
@@ -325,6 +420,7 @@ class IA_Move_Logic():
                 province_allied_armys_quant=province_allied_armys_quant,
             )
 
+            # Verifica se a província é inimiga e chama a função correta
             if owner != self.player:
                 enemy_province_weight = calc_enemy_modifier(
                     province=province,
@@ -334,6 +430,8 @@ class IA_Move_Logic():
                     province_army_health=province_army_health,
                 )
                 value = 1 + base_weight + enemy_province_weight
+
+            # Caso a província seja aliada, chama a função correta
             else:
                 allied_province_weight = calc_ally_modifier(
                     province=province,
@@ -343,18 +441,29 @@ class IA_Move_Logic():
                     province_allied_max_health=province_allied_max_health,
                     province_armys_quant=province_armys_quant,
                 )
+
                 value = 1 + base_weight + allied_province_weight
 
+            # Retorna o valor calculado
             return value
 
+        # Define a província atual do exército
         neighbors = army.get_province().get_neighbors()
+
+        # Define o valor máximo como negativo infinito
         max_value = float("-inf")
+
+        # Define a melhor província como nula
         best_province = None
 
+        # Itera sobre as províncias vizinhas
         for province in neighbors:
+            # Calcula o valor da província
             current_value = sum_val(province, army)
             if current_value > max_value:
+                # Define o valor máximo como o valor calculado se for maior que o valor anteiror, também define a melhor província como a província atual
                 max_value = current_value
                 best_province = province
 
+        # Retorna a melhor província
         return best_province, max_value

@@ -17,7 +17,8 @@ class Province:
 
     def upgrade(self):
         if self.level < self.level_cap:
-            self.level += 1
+            if self.dom_turns == 0:
+                self.level += 1
 
     def produce_army(self):
         self.army_progress += self.level

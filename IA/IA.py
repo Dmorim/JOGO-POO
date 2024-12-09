@@ -1,6 +1,7 @@
 import random
 
 from IA.IA_Move_Logic import IA_Move_Logic
+from IA.IA_Upgrade_Logic import Upgrade_Logic
 
 
 class IA:
@@ -13,6 +14,7 @@ class IA:
                              "Up_Prov": 1, "curar": 1, "pular": 0.5}
 
         self.move_logic = IA_Move_Logic(self.player)
+        self.upgrade_logic = Upgrade_Logic(self.player)
 
     def act_choose(self):
         act_points = self.player.get_player_actions()
@@ -33,7 +35,18 @@ class IA:
                             (self.move_logic.get_army_value(armys))
                         )
                         print(self.player.get_player_name(),
-                              province.get_name(), mov_val)
+                              province.get_name(), mov_val, "MOVE")
+
+                case "Up_Prov":
+                    provinces = self.player.get_upgrade_province()
+                    if len(provinces) == 0:
+                        self.acoes_weight[act] = 0
+                    else:
+                        province, prov_val = self.upgrade_logic.get_province_value(
+                            provinces
+                        )
+                        print(self.player.get_player_name(),
+                              province.get_name(), prov_val, 'UPGRADE')
 
     def act_do(self):
         self.act_choose()

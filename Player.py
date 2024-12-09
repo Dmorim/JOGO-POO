@@ -130,3 +130,11 @@ class Player:
 
     def get_armys_in_province(self, province):
         return [army for army in self.armys if army.get_province() == province]
+
+    def get_upgrade_province(self):
+        return [
+            province
+            for province in self.provinces
+            if province.get_owner() == self
+            and province.is_upgradeable()
+        ]

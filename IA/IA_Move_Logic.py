@@ -170,15 +170,15 @@ class IA_Move_Logic():
             """
 
             # Razão do total de ezércitos na provícia
-            army_ratio = 1 / (1 + sum(army.get_army_quant(
-            ) for army in province.get_armys()))
+            army_ratio = (1 / (1 + sum(army.get_army_quant(
+            ) for army in province.get_armys())) * 0.90)
 
             # Razão da vida dos exércitos na província
             army_health_ratio = province_army_health / province_army_max_health
 
             # Razão dos exércitos aliados na província
-            allied_army_ratio = 1 / (1 + sum(army.get_army_quant(
-            ) for army in province.get_armys() if army.get_owner() == self.player))
+            allied_army_ratio = (1 / (1 + sum(army.get_army_quant(
+            ) for army in province.get_armys() if army.get_owner() == self.player)) * 0.90)
 
             # Média das razões dos exércitos
             armys_ratio = (army_ratio + allied_army_ratio) / 2
@@ -349,23 +349,35 @@ class IA_Move_Logic():
                 float: Valor calculado
             """
 
-            def army_health(army, owner):
+            def army_health(army, owner, origin):
                 """
                 Função interna que calcula a vida total e a vida atual dos exércitos na província.
 
                 Args:
                     army (Object): Exércitos na província
                     owner (Object): Dono da província
+                    origin (String): Origem da chamada da função
 
                 Returns:
                     float: Vida atual e máxima dos exércitos na província
                 """
-
-                # Calcula a vida total e a vida atual dos exércitos na província
-                total_health = sum(armies.get_max_health()
-                                   for armies in army if armies.get_owner() == owner)
-                actual_health = sum(armies.get_health()
-                                    for armies in army if armies.get_owner() == owner)
+                match origin:
+                    case "allied":
+                        # Calcula a vida total e a vida atual dos exércitos na província
+                        total_health = sum(armies.get_max_health()
+                                           for armies in army if armies.get_owner() == owner)
+                        actual_health = sum(armies.get_health()
+                                            for armies in army if armies.get_owner() == owner)
+                    case "enemy":
+                        total_health = sum(armies.get_max_health()
+                                           for armies in army if armies.get_owner() != owner)
+                        actual_health = sum(armies.get_health()
+                                            for armies in army if armies.get_owner() != owner)
+                    case "all":
+                        total_health = sum(armies.get_max_health()
+                                           for armies in army)
+                        actual_health = sum(armies.get_health()
+                                            for armies in army)
 
                 # Retorna a vida atual e a vida total
                 return actual_health, total_health
@@ -391,11 +403,11 @@ class IA_Move_Logic():
 
             # Calcula a vida total e a vida atual dos exércitos na província
             province_army_health, province_army_max_health = army_health(
-                province_army, self.player)
+                province_army, self.player, 'all')
 
             # Calcula a quantidade de exércitos na província
             province_allied_army_health, province_allied_max_health = army_health(
-                province_army, self.player)
+                province_army, self.player, 'allied')
 
             # Calcula a quantidade de exércitos inimigos na província
             province_armys_quant = sum(army.get_army_quant(

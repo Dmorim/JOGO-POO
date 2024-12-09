@@ -80,3 +80,6 @@ class Province:
 
     def get_armys(self):
         return self.current_owner.get_armys_in_province(self)
+
+    def is_upgradeable(self):
+        return self.level < self.level_cap and self.dom_turns == 0

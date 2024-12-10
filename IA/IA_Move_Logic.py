@@ -2,8 +2,11 @@
 class IA_Move_Logic():
 
     def __init__(self, player) -> None:  # Construtor da classe
-        self.player = player  # Define o jogador
+        self.__player = player  # Define o jogador
 
+    @property
+    def player(self):  # Propriedade do jogador
+        return self.__player
     def neighbor_threat_armies(self, army):
         """
         Verifica se o exército está em ameaça por exércitos inimigos com mais quantidade.

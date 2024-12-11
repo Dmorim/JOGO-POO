@@ -158,22 +158,23 @@ class Battle:
             )
             * self.damage_multiplier,
             2,
-        )
+        ) * 10
 
         print(
             f"Dano total do exército atacante: {off_attack_stats
-                            * (self.off_diff_health() * self.diff_health_multiplier)} + diferença de saúde {self.off_diff_health()}"
+                                                * (self.off_diff_health() * self.diff_health_multiplier)} + diferença de saúde {self.off_diff_health()}"
         )
         print(
-            f"Valor base do exército defensor: {(def_defense_stats * self.province.get_terrain().get_defence_modifier()) * self.province.get_defence_modifier()}"
+            f"Valor base do exército defensor: {(def_defense_stats * self.province.get_terrain(
+            ).get_defence_modifier()) * self.province.get_defence_modifier()}"
         )
         print(
             f"Valor total do exército defensor: {((def_defense_stats
-                                    * self.province.get_terrain().get_defence_modifier()
-                                )
-                                * self.province.get_defence_modifier()
-                            )
-                            * (self.def_diff_health() * self.diff_health_multiplier)} + diferença de saúde {self.def_diff_health()}"
+                                                   * self.province.get_terrain().get_defence_modifier()
+                                                   )
+                                                  * self.province.get_defence_modifier()
+                                                  )
+                                                 * (self.def_diff_health() * self.diff_health_multiplier)} + diferença de saúde {self.def_diff_health()}"
         )
 
         return off_damage if off_damage > 0 else 0.1
@@ -200,7 +201,7 @@ class Battle:
             )
             * self.damage_multiplier,
             2,
-        )
+        ) * 10
         return def_damage if def_damage > 0 else 0.1
 
     def health_check(self):
@@ -334,7 +335,8 @@ if __name__ == "__main__":
     for i in range(0, 100):
         var = teste.battle_going()
         print(
-            f"\nVida do exército atacante: {teste.get_off_actual_health()}\nVida do exército defensor: {teste.get_def_actual_health()}\n"
+            f"\nVida do exército atacante: {teste.get_off_actual_health(
+            )}\nVida do exército defensor: {teste.get_def_actual_health()}\n"
         )
         if var is True:
             break

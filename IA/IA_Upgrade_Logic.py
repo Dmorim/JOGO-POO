@@ -3,7 +3,11 @@ from math import log
 
 class Upgrade_Logic:
     def __init__(self, player) -> None:
-        self.player = player
+        self.__player = player
+        
+    @property
+    def player(self):
+        return self.__player
 
     def get_province_value(self, provinces):
         provinces_value = []

@@ -7,6 +7,7 @@ class IA_Move_Logic():
     @property
     def player(self):  # Propriedade do jogador
         return self.__player
+
     def neighbor_threat_armies(self, army):
         """
         Verifica se o exército está em ameaça por exércitos inimigos com mais quantidade.
@@ -481,4 +482,4 @@ class IA_Move_Logic():
                 best_province = province
 
         # Retorna a melhor província
-        return best_province, max_value
+        return best_province, army, max_value

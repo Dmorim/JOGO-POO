@@ -28,7 +28,10 @@ class Heal_Logic:
         if isinstance(army, Army_Group):
             heal_values = army.heal_army_value()
             average_heal_value = sum(heal_values) / len(heal_values)
-            return army.get_health() / average_heal_value
+            avarage_max_health = army.get_max_health() / army.get_army_quant()
+            avarage_army_health = army.get_health() / army.get_army_quant()
+            average_healing_need = avarage_max_health - avarage_army_health
+            return average_healing_need / average_heal_value
         else:
             return army.get_health() / army.heal_army_value()
 
@@ -63,7 +66,7 @@ class Heal_Logic:
             self.combined_army_status_ratio(army), 50)
         neighbour_battle_modifier = 0.4 if self.in_battle_neighbour_provinces(
             army) else 0
-        healing_time_modifier = 1 / 1.25 + (self.healing_time(army))
+        healing_time_modifier = 1 / (1.25 + self.healing_time(army))
         enemy_armys_modifier = self.obtain_log_value(
             self.enemy_armys_in_neighbour_provinces(army), 50)
 

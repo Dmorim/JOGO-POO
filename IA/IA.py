@@ -2,55 +2,89 @@ import random
 
 from IA.IA_Move_Logic import IA_Move_Logic
 from IA.IA_Upgrade_Logic import Upgrade_Logic
+from IA.IA_Heal_Logic import Heal_Logic
 
 
 class IA:
     def __init__(self, name, player) -> None:
         self.name = name
         self.player = player
-        self.acoes_custo = {"mover": 0.75,
-                            "Up_Prov": 1.5, "curar": 0.75, "pular": 0.0}
-        self.acoes_weight = {"mover": 1,
-                             "Up_Prov": 1, "curar": 1, "pular": 0.5}
+        self.acoes_custo = {"Move": 0.75,
+                            "Up_Prov": 1.5, "Heal": 0.75, "Skip": 0.0}
 
         self.move_logic = IA_Move_Logic(self.player)
         self.upgrade_logic = Upgrade_Logic(self.player)
+        self.heal_logic = Heal_Logic(self.player)
 
     def act_choose(self):
         act_points = self.player.get_player_actions()
         acts_ = list(self.acoes_custo.keys())
+        acts_weitgh = [('Skip', 0.5)]
 
-        for act in acts_:
-            if act_points < self.acoes_custo[act]:
-                acts_.remove(act)
+        move_act_var = []
+        up_act_var = []
+        heal_act_var = []
 
-        for act in acts_:
+        valid_acts = [
+            act for act in acts_ if self.acoes_custo[act] <= act_points]
+
+        for act in valid_acts:
             match act:
-                case "mover":
+                case "Move":
                     armys = self.player.get_available_army()
                     if not armys:
-                        self.acoes_weight[act] = 0
+                        acts_weitgh.append((act, 0))
                     else:
-                        province, mov_val = self.move_logic.get_province_value(
+                        province, army, mov_val = self.move_logic.get_province_value(
                             (self.move_logic.get_army_value(armys))
                         )
-                        print(self.player.get_player_name(),
-                              province.get_name(), mov_val, "MOVE")
+                        acts_weitgh.append((act, mov_val))
+                        acts_weitgh.sort(key=lambda x: x[1], reverse=True)
+                        move_act_var.append((province, army))
+
+                        print(mov_val, 'move')
 
                 case "Up_Prov":
                     provinces = self.player.get_upgrade_province()
                     if len(provinces) == 0:
-                        self.acoes_weight[act] = 0
+                        acts_weitgh.append((act, 0))
                     else:
                         province, prov_val = self.upgrade_logic.get_province_value(
                             provinces
                         )
-                        print(self.player.get_player_name(),
-                              province.get_name(), prov_val, 'UPGRADE')
+                        acts_weitgh.append((act, prov_val))
+                        acts_weitgh.sort(key=lambda x: x[1], reverse=True)
+                        up_act_var.append(province)
+
+                        print(prov_val, 'upgrade')
+
+                case "Heal":
+                    armys = self.player.wound_army()
+                    if len(armys) == 0:
+                        acts_weitgh.append((act, 0))
+                    else:
+                        armie, heal_val = self.heal_logic.get_healing_logic_value(
+                            armys
+                        )
+                        acts_weitgh.append((act, heal_val))
+                        acts_weitgh.sort(key=lambda x: x[1], reverse=True)
+                        heal_act_var.append(armie)
+
+                        print(heal_val, 'heal')
+
+        match acts_weitgh[0][0]:
+            case "Move":
+                return acts_weitgh[0][0], move_act_var
+            case "Up_Prov":
+                return acts_weitgh[0][0], up_act_var
+            case "Heal":
+                return acts_weitgh[0][0], heal_act_var
+            case "Skip":
+                return acts_weitgh[0][0], 0
 
     def act_do(self):
-        self.act_choose()
-        return "Pular", None
+        action, act_list = self.act_choose()
+        return action, act_list
         """
         if act == "mover":
             return "Mover", self.act_move()

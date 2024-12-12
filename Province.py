@@ -11,6 +11,7 @@ class Province:
         self.in_battle = False
         self.dom_turns = 0
         self.create_army_requisition = 1
+        self.turns_under_control = 0
 
         self.level_defence_modifiers = {
             1: 1.0, 2: 1.5, 3: 1.6, 4: 1.75, 5: 1.9}
@@ -36,6 +37,16 @@ class Province:
 
     def get_neighbors(self):
         return self.neighbor_provinces
+
+    def get_turns_under_control(self):
+        return self.turns_under_control
+
+    def increment_turns_under_control(self):
+        if self.dom_turns == 0:
+            self.turns_under_control += 1
+
+    def reset_turns_under_control(self):
+        self.turns_under_control = 0
 
     def get_move_req(self):
         return self.move_req

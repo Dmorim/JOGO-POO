@@ -19,9 +19,9 @@ class Main:
 
         ### Criação de Terrenos ###
         planice = Terrain("Planice", 1, 1, 1)
-        floresta = Terrain("Floresta", 1.15, 1.20, 1.5)
-        montanha = Terrain("Montanha", 1.8, 1.35, 1.8)
-        tundra = Terrain("Tundra", 1.15, 0.9, 1.1)
+        floresta = Terrain("Floresta", 1.15, 1.40, 1.5)
+        montanha = Terrain("Montanha", 1.8, 1.50, 1.8)
+        tundra = Terrain("Tundra", 1.15, 1.1, 1.1)
         deserto = Terrain("Deserto", 1.2, 0.9, 1.2)
 
         ### Criação de Províncias ###

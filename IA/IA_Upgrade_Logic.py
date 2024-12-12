@@ -4,10 +4,15 @@ from math import log
 class Upgrade_Logic:
     def __init__(self, player) -> None:
         self.__player = player
-        
+
     @property
     def player(self):
         return self.__player
+
+    def calculate_turns_under_control(self, province):
+        if province.get_turns_under_control() == 0:
+            return 0
+        return log(province.get_turns_under_control() + 1, 10)
 
     def get_province_value(self, provinces):
         provinces_value = []
@@ -60,7 +65,7 @@ class Upgrade_Logic:
             else:
                 return 0
 
-        province_level_modifier = 1 / province.get_level()
+        province_level_modifier = 1 / (province.get_level() ** 2)
         neighbors_enemy_level_modifier = 0.15 * \
             enemy_level_in_neighbors(province)
         terrain_modifier = 1 - province.get_terrain().get_upgrade_modifier()
@@ -70,10 +75,15 @@ class Upgrade_Logic:
             province)
         highest_level_neighbor_modifier = 0.50 if neighbors_enemy_level_comparison(
             province) else 0
+        turns_under_control_modifier = 1.25*(self.calculate_turns_under_control(
+            province))
+        upgrade_cost_modifier = 1 - province.get_terrain().get_upgrade_modifier()
 
         value = province_level_modifier + neighbors_enemy_level_modifier + terrain_modifier + \
             neighbors_province_count_modifier + \
-            enemy_army_in_neighbors_modifier + highest_level_neighbor_modifier
+            enemy_army_in_neighbors_modifier + \
+            highest_level_neighbor_modifier + \
+            turns_under_control_modifier + upgrade_cost_modifier
 
         return value
 

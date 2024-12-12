@@ -204,6 +204,7 @@ class Game:
                     if battle.winner == battle.off_army_owner:
                         battle.province.set_current_owner(battle.winner)
                         battle.province.set_dom_turns(3)
+                        battle.province.reset_turns_under_control()
                         battle.winner.add_province(battle.province)
                         battle.loser.remove_province(battle.province)
 
@@ -274,6 +275,8 @@ class Game:
                 self.update_battles()
                 self.group_army(self.current_player)
                 self.turn_healing(self.current_player)
+                for province in self.current_player.get_player_province():
+                    province.increment_turns_under_control()
             self.next_turn()
 
     def army_move_points(self):

@@ -8,6 +8,19 @@ class IA_Move_Logic():
     def player(self):  # Propriedade do jogador
         return self.__player
 
+    def obtain_move_requisition_turns_value(self, army, province):
+        province_army_move_requisition = army.get_province().get_move_req() * \
+            army.get_province().get_terrain().get_move_modifier()
+
+        destination_province_move_requisition = (province.get_move_req(
+        ) * province.get_terrain().get_move_modifier()) * 1.6 if province.get_owner() != self.player else 1
+
+        total_requisition = province_army_move_requisition + \
+            destination_province_move_requisition
+        turns_to_move = round(total_requisition / army.get_move_points(), 0)
+
+        return turns_to_move
+
     def neighbor_threat_armies(self, army):
         """
         Verifica se o exército está em ameaça por exércitos inimigos com mais quantidade.
@@ -187,6 +200,9 @@ class IA_Move_Logic():
             # Média das razões dos exércitos
             armys_ratio = (army_ratio + allied_army_ratio) / 2
 
+            distance_modifier = 0.25 * \
+                self.obtain_move_requisition_turns_value(army, province)
+
             # Modificador de batalha
             battle_modifier = 0.3 if province.get_in_battle() else 0.0
 
@@ -199,6 +215,7 @@ class IA_Move_Logic():
                 + army_health_ratio
                 + battle_modifier
                 + no_army_modifier
+                - distance_modifier
             )
 
             return base_weight

@@ -9,8 +9,8 @@ class IA:
     def __init__(self, name, player) -> None:
         self.name = name
         self.player = player
-        self.acoes_custo = {"Move": 0.75,
-                            "Up_Prov": 1.5, "Heal": 0.75, "Skip": 0.0}
+        self.acoes_custo = {"Move": self.player.obtain_move_modifier(),
+                            "Up_Prov": self.player.obtain_upgrade_modifier(), "Heal": self.player.obtain_heal_modifier(), "Skip": 0.0}
 
         self.move_logic = IA_Move_Logic(self.player)
         self.upgrade_logic = Upgrade_Logic(self.player)

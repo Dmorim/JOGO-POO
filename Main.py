@@ -2,7 +2,7 @@ from Player import Player
 from Terrain import Terrain
 from Province import Province
 from Game import Game
-from IA import IA
+from IA.IA import IA
 
 
 class Main:
@@ -19,9 +19,9 @@ class Main:
 
         ### Criação de Terrenos ###
         planice = Terrain("Planice", 1, 1, 1)
-        floresta = Terrain("Floresta", 1.15, 1.20, 1.5)
-        montanha = Terrain("Montanha", 1.8, 1.35, 1.8)
-        tundra = Terrain("Tundra", 1.15, 0.9, 1.1)
+        floresta = Terrain("Floresta", 1.15, 1.40, 1.5)
+        montanha = Terrain("Montanha", 1.8, 1.50, 1.8)
+        tundra = Terrain("Tundra", 1.15, 1.1, 1.1)
         deserto = Terrain("Deserto", 1.2, 0.9, 1.2)
 
         ### Criação de Províncias ###
@@ -63,7 +63,8 @@ class Main:
 
         # Províncias da IA 3
         def america_add_provinces(player_m):
-            self.cidade_do_mexico = Province("Cidade do México", player_m, floresta)
+            self.cidade_do_mexico = Province(
+                "Cidade do México", player_m, floresta)
             self.quito = Province("Quito", player_m, montanha)
             self.lima = Province("Lima", player_m, floresta)
             self.buenos_aires = Province("Buenos Aires", player_m, planice)
@@ -74,10 +75,12 @@ class Main:
             player_m.add_province(self.buenos_aires)
 
         def add_neighbors():
-            self.berlim.add_neighbor(self.viena, self.moscou, self.skopje, self.cartum)
+            self.berlim.add_neighbor(
+                self.viena, self.moscou, self.skopje, self.cartum)
             self.viena.add_neighbor(self.lima, self.skopje, self.berlim)
             self.moscou.add_neighbor(self.skopje, self.berlim, self.teera)
-            self.skopje.add_neighbor(self.moscou, self.berlim, self.viena, self.cairo)
+            self.skopje.add_neighbor(
+                self.moscou, self.berlim, self.viena, self.cairo)
             self.lima.add_neighbor(
                 self.viena,
                 self.buenos_aires,
@@ -85,8 +88,10 @@ class Main:
                 self.quito,
                 self.cairo,
             )
-            self.cidade_do_mexico.add_neighbor(self.lima, self.buenos_aires, self.quito)
-            self.quito.add_neighbor(self.lima, self.cidade_do_mexico, self.buenos_aires)
+            self.cidade_do_mexico.add_neighbor(
+                self.lima, self.buenos_aires, self.quito)
+            self.quito.add_neighbor(
+                self.lima, self.cidade_do_mexico, self.buenos_aires)
             self.buenos_aires.add_neighbor(
                 self.lima, self.cidade_do_mexico, self.quito, self.toquio
             )

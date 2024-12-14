@@ -2,12 +2,15 @@ from Army import Army
 
 
 class Player:
-    def __init__(self, name: str):
+    def __init__(self, name: str, move_base_modifier=1.2, upgrade_base_modifier=2.0, heal_base_modifier=0.75):
         self.name = name
         self.provinces = []
         self.armys = []
         self.actions = 0
         self.ia = None
+        self.move_base_modifier = move_base_modifier
+        self.upgrade_base_modifier = upgrade_base_modifier
+        self.heal_base_modifier = heal_base_modifier
 
     def add_province(self, province: object):
         self.provinces.append(province)
@@ -36,26 +39,35 @@ class Player:
     def get_no_move_armys(self):
         return [army for army in self.armys if not army.get_in_move()]
 
+    def obtain_move_modifier(self):
+        return self.move_base_modifier
+
     def action_move_army(self):
-        if self.actions >= 0.75:
-            self.actions -= 0.75
+        if self.actions >= self.move_base_modifier:
+            self.actions -= self.move_base_modifier
             return True
         return False
 
+    def obtain_upgrade_modifier(self):
+        return self.upgrade_base_modifier
+
     def action_upgrade_province(self, province):
-        modi = self.get_upgrade_cost(province)
-        if self.actions >= modi:
-            self.actions -= modi
+        upgrade_cost = self.get_upgrade_cost(province)
+        if self.actions >= upgrade_cost:
+            self.actions -= upgrade_cost
             return True
         return False
 
     def get_upgrade_cost(self, province):
-        modi = province.get_terrain().get_upgrade_modifier()
-        return round(2 * modi, 2)
+        cost = province.get_terrain().get_upgrade_modifier()
+        return round(self.upgrade_base_modifier * cost, 2)
+
+    def obtain_heal_modifier(self):
+        return self.heal_base_modifier
 
     def action_heal_army(self):
-        if self.actions >= 0.75:
-            self.actions -= 0.75
+        if self.actions >= self.heal_base_modifier:
+            self.actions -= self.heal_base_modifier
 
     def can_perform_action(self):
         return self.actions > 0
@@ -127,3 +139,14 @@ class Player:
 
     def get_no_healing_armys(self):
         return [army for army in self.armys if not army.get_in_healing()]
+
+    def get_armys_in_province(self, province):
+        return [army for army in self.armys if army.get_province() == province]
+
+    def get_upgrade_province(self):
+        return [
+            province
+            for province in self.provinces
+            if province.get_owner() == self
+            and province.is_upgradeable()
+        ]

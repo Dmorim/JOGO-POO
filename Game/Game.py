@@ -1,125 +1,9 @@
 from Army import Army_Group
 from Battle import Battle
+from Game.Move_Execution import Movement
 
 
 class Game:
-    class Moviment:
-        def __init__(self, game, enemy_territory_mod=1.60, friendly_territory_mod=1):
-            self.enemy_territory_modifier = enemy_territory_mod
-            self.friendly_territory_modifier = friendly_territory_mod
-            self.game = game
-
-        def army_make_movement(self, selected_army, move_to, destination=None):
-            if destination is not None:
-                dest_prov = destination
-            else:
-                dest_prov = selected_army.get_province().get_neighbors()[
-                    int(move_to) - 1
-                ]
-            move_needed = round(
-                (
-                    selected_army.get_province().get_move_req()
-                    * selected_army.get_province().get_terrain().get_move_modifier()
-                )
-                + (
-                    dest_prov.get_move_req()
-                    * dest_prov.get_terrain().get_move_modifier()
-                    * self.enemy_territory_modifier
-                    if dest_prov.get_owner() != selected_army.get_owner()
-                    else self.friendly_territory_modifier
-                ),
-                0,
-            )
-            move_points = selected_army.get_move_points()
-            turns_to_move = round(move_needed / move_points, 0)
-            self.game.current_player.action_move_army()
-            selected_army.turns_to_move = turns_to_move
-            selected_army.dest_province = dest_prov
-            selected_army.in_move = True
-
-            print(
-                f"Exército em movimento para {selected_army.dest_province.get_name()}. Faltam {
-                    selected_army.turns_to_move} turnos para chegar."
-            )
-
-        def army_movement(self, player_m, selected_army):
-            if selected_army.in_move:
-                print(
-                    f"Exército em movimento para {selected_army.dest_province.get_name()}. Faltam {
-                        selected_army.turns_to_move} turnos para chegar."
-                )
-                print("Ações disponíveis:\n1 - Cancelar Movimento\n0 - Voltar")
-                action = input()
-                if action == "1":
-                    selected_army.in_move = False
-                    selected_army.turns_to_move = None
-                    selected_army.dest_province = None
-                    print("Movimento cancelado.")
-                    self.mapmode = False
-
-                if action == "0":
-                    pass
-                return
-
-            if selected_army.get_in_healing():
-                print("Exército em cura. Não é possível mover.")
-                self.mapmode = False
-                return
-
-            print("Selecione a província de destino do exército:")
-            for neighbor in selected_army.get_province().get_neighbors():
-                print(
-                    f"{neighbor.get_name()}, {neighbor.get_terrain().get_terrain_name()}: ({
-                        selected_army.get_province().get_neighbors().index(neighbor) + 1}) "
-                )
-            move_to = input()
-            if int(move_to) <= len(selected_army.get_province().get_neighbors()) + 1:
-                cond = player_m.action_move_army()
-                if cond:
-                    self.army_make_movement(selected_army, move_to)
-                    if player_m.get_player_actions() > 0:
-                        self.mapmode = False
-            else:
-                print("Província inválida")
-                self.mapmode = False
-
-        def update_movement_turns(self, player_m):
-            for army in player_m.get_army_in_move():
-                if self.verify_battle(army):
-                    army.turns_to_move -= 1
-                    if army.turns_to_move == 0:
-                        self.army_into_province(army)
-
-            for province in player_m.provinces:
-                if province.get_dom_turns() > 0:
-                    province.update_dom_turns()
-
-        def cancel_movement(self, selected_army):
-            selected_army.in_move = False
-            selected_army.turns_to_move = None
-            selected_army.dest_province = None
-
-        def verify_battle(self, selected_army):
-            if selected_army.dest_province.get_in_battle():
-                for battle in self.game.ongoing_battles:
-                    if battle.get_province() == selected_army.dest_province:
-                        if (
-                            battle.get_off_army_owner() != selected_army.get_owner()
-                            and battle.get_def_army_owner() != selected_army.get_owner()
-                        ):
-                            self.cancel_movement(selected_army)
-                            return False
-            return True
-
-        def army_into_province(self, selected_army):
-            selected_army.in_move = False
-            selected_army.current_province = selected_army.dest_province
-            if selected_army.dest_province.get_in_battle():
-                self.game.check_battles(selected_army)
-            elif selected_army.dest_province.get_owner() != selected_army.get_owner():
-                self.game.check_battles(selected_army)
-            selected_army.dest_province = None
-            selected_army.turns_to_move = None
 
     def __init__(self):
         self.players = []
@@ -128,7 +12,7 @@ class Game:
         self.turn_count = 0
         self.ongoing_battles = []
         self.finished_battles = []
-        self.moviment = self.Moviment(self)
+        self.movement = Movement(self)
         self.const_army_move_points = 5
 
     def add_player(self, player):
@@ -136,13 +20,6 @@ class Game:
 
     def remove_player(self, player):
         self.players.remove(player)
-
-    def add_battle(self, battle):
-        self.ongoing_battles.append(battle)
-
-    def remove_battle(self, battle):
-        self.ongoing_battles.remove(battle)
-        self.finished_battles.append(battle)
 
     def get_turn_count(self):
         return self.turn_count
@@ -157,57 +34,6 @@ class Game:
             if len(player.get_player_province()) == 0:
                 return True
         return False
-
-    def check_battles(self, army):
-        if len(self.ongoing_battles) == 0:
-            self.create_battle(army)
-        else:
-            for battle in self.ongoing_battles:
-                if battle.province == army.dest_province:
-                    if army.get_owner() == battle.off_army_owner:
-                        battle.add_off_army(army)
-                    else:
-                        battle.add_def_army(army)
-                else:
-                    self.create_battle(army)
-
-    def create_battle(self, army):
-        if army.dest_province.get_in_battle():
-            return
-        battle = Battle(
-            army.get_owner(), army.dest_province.get_owner(), army.dest_province
-        )
-        battle.create_def_army()
-        battle.create_off_army()
-        battle.province.set_in_battle(True)
-        self.add_battle(battle)
-
-    def army_health_check(self):
-        for player in self.players:
-            for army in player.get_armys():
-                if army.get_health() <= 0:
-                    player.remove_army(army)
-
-    def unbattle_armys_of_battle(self, battle: object):
-        for army in battle.winner.armys:
-            if army.get_in_battle():
-                army.set_in_battle(False)
-
-    def update_battles(self):
-        for battle in self.ongoing_battles:
-            if battle.off_army_owner == self.current_player:
-                up_bat = battle.battle_going()
-                if up_bat is True:
-                    self.army_health_check()
-                    self.unbattle_armys_of_battle(battle)
-                    self.remove_battle(battle)
-                    battle.province.set_in_battle(False)
-                    if battle.winner == battle.off_army_owner:
-                        battle.province.set_current_owner(battle.winner)
-                        battle.province.set_dom_turns(3)
-                        battle.province.reset_turns_under_control()
-                        battle.winner.add_province(battle.province)
-                        battle.loser.remove_province(battle.province)
 
     def next_turn(self):
         # Switch to the next player
@@ -369,10 +195,6 @@ class Game:
         else:
             province.upgrade()
 
-    def attack_province(self):
-        # Implement province attack logic
-        pass
-
     def print_map(self):
         # Print the map with province ownership and armies
         print(f"\nTurno: {self.get_turn_count()}")
@@ -427,98 +249,6 @@ class Game:
                 print(f"{battle.get_last_def_damage()}\n")
                 if self.ongoing_battles.index(battle) != len(self.ongoing_battles) - 1:
                     print(f"{'='*78}\n")
-
-    def group_army(self, player_m):
-        for province in player_m.provinces:
-            armies = [
-                army
-                for army in player_m.armys
-                if army.get_province() == province and army.get_in_move() == False
-            ]
-
-            if len(armies) > 1:
-                group = None
-                for army in armies:
-                    if isinstance(army, Army_Group):
-                        group = army
-                        break
-
-                if group is None:
-                    self.create_group_army(player_m, armies)
-
-                else:
-                    self.add_army_to_group(player_m, armies)
-
-    def create_group_army(self, player_m, armies):
-        army_group = armies[0].group_army()
-        player_m.armys.append(army_group)
-        for army in armies:
-            army_group.add_army(army)
-            player_m.armys.remove(army)
-
-    def add_army_to_group(self, player_m, armies):
-        # Check if there is an existing Army_Group
-        for army in armies:
-            if isinstance(army, Army_Group):
-                group = army
-                break
-        for army in armies:
-            if army != group:
-                if army not in group.get_armys():
-                    if not isinstance(army, Army_Group):
-                        group.add_army(army)
-                        player_m.armys.remove(army)
-                    else:
-                        army.transfer_army(group)
-                        player_m.armys.remove(army)
-        return
-
-    def army_split(self, player_m, selected_army):
-        if selected_army.get_in_move():
-            print("Exército em movimento. Não é possível dividir.")
-            return
-        if selected_army.get_in_healing():
-            print("Exército em cura. Não é possível dividir.")
-            return
-        if isinstance(selected_army, Army_Group):
-            army = selected_army.split_group()
-            if army is not None:
-                player_m.armys.append(army)
-                self.mapmode = False
-        else:
-            print("Exército não é um grupo.")
-            return
-        return
-
-    def heal_army(self, selected_army):
-        if selected_army.get_in_move():
-            print("Exército em movimento. Não é possível curar.")
-            self.mapmode = False
-            return
-        if selected_army.get_in_healing():
-            print("Exército já está em cura. Deseja cancelar? (S/N)")
-            if input().lower() == "s":
-                selected_army.set_in_healing(False)
-                print("Cura cancelada.")
-            elif input().lower() == "n":
-                pass
-            else:
-                print("Comando inválido.")
-            self.mapmode = False
-            return
-        if selected_army.get_health() == selected_army.get_max_health():
-            print("Exército já está com vida máxima.")
-            self.mapmode = False
-            return
-        if selected_army.get_province().get_in_battle():
-            print("Exército em batalha, não é possível curar ele")
-            self.mapmode = False
-            return
-        selected_army.set_in_healing(True)
-        selected_army.get_owner().action_heal_army()
-        print("Exército em cura.")
-        self.mapmode = False
-        return
 
     def turn_healing(self, player_m):
         for army in player_m.get_army_in_healing():

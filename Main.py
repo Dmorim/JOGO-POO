@@ -1,7 +1,7 @@
 from Player import Player
 from Terrain import Terrain
 from Province import Province
-from Game import Game
+from Game.Game import Game
 from IA.IA import IA
 
 

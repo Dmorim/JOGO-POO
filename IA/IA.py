@@ -42,8 +42,6 @@ class IA:
                         acts_weitgh.sort(key=lambda x: x[1], reverse=True)
                         move_act_var.append((province, army))
 
-                        print(mov_val, 'move')
-
                 case "Up_Prov":
                     provinces = self.player.get_upgrade_province()
                     if len(provinces) == 0:
@@ -56,8 +54,6 @@ class IA:
                         acts_weitgh.sort(key=lambda x: x[1], reverse=True)
                         up_act_var.append(province)
 
-                        print(prov_val, 'upgrade')
-
                 case "Heal":
                     armys = self.player.wound_army()
                     if len(armys) == 0:
@@ -69,8 +65,6 @@ class IA:
                         acts_weitgh.append((act, heal_val))
                         acts_weitgh.sort(key=lambda x: x[1], reverse=True)
                         heal_act_var.append(armie)
-
-                        print(heal_val, 'heal')
 
         match acts_weitgh[0][0]:
             case "Move":

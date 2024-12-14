@@ -158,8 +158,8 @@ class Battle:
             )
             * self.damage_multiplier,
             2,
-        ) * 10
-
+        )
+        """
         print(
             f"Dano total do exército atacante: {off_attack_stats
                                                 * (self.off_diff_health() * self.diff_health_multiplier)} + diferença de saúde {self.off_diff_health()}"
@@ -176,7 +176,7 @@ class Battle:
                                                   )
                                                  * (self.def_diff_health() * self.diff_health_multiplier)} + diferença de saúde {self.def_diff_health()}"
         )
-
+        """
         return off_damage if off_damage > 0 else 0.1
 
     def def_damage(self, def_attack_stats, off_defense_stats):
@@ -201,7 +201,7 @@ class Battle:
             )
             * self.damage_multiplier,
             2,
-        ) * 10
+        )
         return def_damage if def_damage > 0 else 0.1
 
     def health_check(self):

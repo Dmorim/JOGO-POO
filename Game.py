@@ -32,6 +32,7 @@ class Game:
             )
             move_points = selected_army.get_move_points()
             turns_to_move = round(move_needed / move_points, 0)
+            self.game.current_player.action_move_army()
             selected_army.turns_to_move = turns_to_move
             selected_army.dest_province = dest_prov
             selected_army.in_move = True

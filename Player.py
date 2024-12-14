@@ -2,7 +2,7 @@ from Army import Army
 
 
 class Player:
-    def __init__(self, name: str, move_base_modifier=1.2, upgrade_base_modifier=1.80, heal_base_modifier=0.75):
+    def __init__(self, name: str, move_base_modifier=1.2, upgrade_base_modifier=2.0, heal_base_modifier=0.75):
         self.name = name
         self.provinces = []
         self.armys = []

@@ -85,35 +85,6 @@ class IA:
     def act_do(self):
         action, act_list = self.act_choose()
         return action, act_list
-        """
-        if act == "mover":
-            return "Mover", self.act_move()
-        elif act == "Up_Prov":
-            return "Upgrade", self.act_upgrade(prov)
-        elif act == "curar":
-            return "Curar", self.act_heal()
-        elif act == "pular":
-            return "Pular", None
-        """
-
-    def act_move(self):
-        army = self.player.get_no_move_armys()
-        army_choose = random.choice(army)
-        province = army_choose.get_province()
-        neighbors = province.get_neighbors()
-        province_move = random.choice(neighbors)
-
-        return army_choose, province_move
-
-    def act_upgrade(self, prov):
-        return prov
-
-    def act_heal(self):
-        army = self.player.wound_army()
-        heal_army = random.choice(army)
-        if heal_army.get_in_healing():
-            self.act_heal()
-        return heal_army
 
 
 """

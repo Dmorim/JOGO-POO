@@ -76,6 +76,9 @@ class Army:
     def get_army_quant(self):
         return 1
 
+    def army_situation(self):
+        return f"Exército: Ataque: {self.get_attack()}, Defesa: {self.get_defense()}, Vida: {self.get_health()}. Província: {self.get_province().get_name()} {'(Em Cura)' if self.get_in_healing() else '' or '(Em Movimento)' if self.get_in_move() else ''}"
+
 
 class Army_Group(Army):
     def __init__(self, current_province, owner, attack=1, defense=1):
@@ -150,3 +153,6 @@ class Army_Group(Army):
         for army in self.armys:
             quant += army.get_army_quant()
         return quant
+
+    def army_situation(self):
+        return f'Grupo com: {self.get_army_quant()} exércitos. Ataque: {self.get_attack()}, Defesa: {self.get_defense()}, Saúde: {self.get_health()}. Província: {self.get_province().get_name()} {"(Em Cura)" if self.get_in_healing() else "" or "(Em Movimento)" if self.get_in_move() else ""}'

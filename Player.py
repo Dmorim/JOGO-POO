@@ -7,7 +7,7 @@ class Player:
         self.provinces = []
         self.armys = []
         self.actions = 0
-        self.ia = None
+        self.ia = self
         self.move_base_modifier = move_base_modifier
         self.upgrade_base_modifier = upgrade_base_modifier
         self.heal_base_modifier = heal_base_modifier

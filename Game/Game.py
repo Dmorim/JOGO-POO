@@ -1,6 +1,7 @@
 from Army import Army_Group
 from Battle import Battle
 from Game.Move_Execution import Movement
+from Game.Player_Actions import Player_Action
 
 
 class Game:
@@ -51,49 +52,10 @@ class Game:
                 player.actions += 3
                 self.mapmode = True
                 self.army_move_points()
+                self.actions = Player_Action(self)
 
                 while self.current_player.can_perform_action():
-                    if self.current_player.get_ia() is None:
-                        # Perform action based on player's choice
-                        if self.mapmode:
-                            self.print_map()
-                        print(
-                            f"{'='*25}\nJogador Atual: {self.current_player.get_player_name()}"
-                        )
-                        print(
-                            f"Pontos de Ação: {
-                                round(self.current_player.get_player_actions(), 2)}\n"
-                        )
-                        action = input("Escolha uma opção: ")
-                        if action == "1":
-                            self.army_actions(self.current_player)
-                        elif action == "2":
-                            self.upgrade_province(self.current_player)
-                        elif action == "3":
-                            self.attack_province()
-                        elif action == "0":
-                            break
-                        else:
-                            print("Invalid action. Try again.")
-                    else:
-                        act, var = self.current_player.ia.act_do()
-                        if act == "Move":
-                            province = var[0][0]
-                            army = var[0][1]
-                            self.moviment.army_make_movement(
-                                army, None, province)
-                            print(f"Exército movido para {
-                                  province.get_name()}")
-                        elif act == "Up_Prov":
-                            prov = var[0]
-                            self.current_player.action_upgrade_province(prov)
-                            self.upgrade_province(self.current_player, prov)
-                            print(f"Província {prov.get_name()} melhorada")
-                        elif act == "Heal":
-                            heal_army = var[0]
-                            self.heal_army(heal_army)
-                        elif act == "Skip":
-                            break
+                    self.actions.action(self.current_player.get_ia())
 
                 # Update game state
 
@@ -115,60 +77,6 @@ class Game:
     def army_creation(self, player_m):
         for province in player_m.get_player_province():
             province.produce_army()
-
-    def army_actions(self, player_m):
-        selected_army: str
-        # Implement troop movement logic
-        if player_m.get_available_army():
-            print("Exércitos disponíveis: ")
-            for army in player_m.get_available_army():
-                if isinstance(army, Army_Group):
-                    if army.get_in_healing():
-                        print(
-                            f"Grupo com: {len(army.get_armys())} exércitos. Ataque: {army.get_attack()}, Defesa: {army.get_defense()}, Saúde: {
-                                army.get_health()}, Província: {army.get_province().get_name()} {'(Em Cura)' if army.get_in_healing() else ''}"
-                        )
-                    else:
-                        print(
-                            f"Grupo com: {len(army.get_armys())} exércitos. Ataque: {army.get_attack()}, Defesa: {army.get_defense()}, Saúde: {army.get_health()}, Província: {
-                                army.get_province().get_name()}, ({player_m.get_available_army().index(army) + 1}) {'(Em movimento)' if army.get_in_move() else ''}"
-                        )
-                else:
-                    if army.get_in_healing():
-                        print(
-                            f"Exército: Ataque: {army.get_attack()}, Defesa: {army.get_defense()}, Vida: {army.get_health(
-                            )}. Província: {army.get_province().get_name()} {'(Em Cura)' if army.get_in_healing() else ''}"
-                        )
-                    else:
-                        print(
-                            f"Exército: Ataque: {army.get_attack()}, Defesa: {army.get_defense()}, Vida: {army.get_health()}. Província: {army.get_province(
-                            ).get_name()}, ({player_m.get_available_army().index(army) + 1}) {'(Em movimento)' if army.get_in_move() else ''}"
-                        )
-
-            selected_army = input()
-            if int(selected_army) <= len(player_m.get_available_army()) + 1:
-                selected_army = player_m.armys[int(selected_army) - 1]
-                print(
-                    f"Província atual: {selected_army.get_province().get_name()}, Vizinhos: {
-                        [neighbor.get_name() for neighbor in selected_army.get_province().get_neighbors()]}"
-                )
-
-                print(
-                    "Ações disponíveis:\n1 - Mover Exército\n2 - Dividir Exército\n3 - Curar Exército\n0 - Voltar"
-                )
-                army_actions = input()
-                if army_actions == "1":
-                    self.moviment.army_movement(player_m, selected_army)
-                elif army_actions == "2":
-                    self.army_split(player_m, selected_army)
-                elif army_actions == "3":
-                    self.heal_army(selected_army)
-                elif army_actions == "0":
-                    pass
-
-        else:
-            print("Não há exércitos disponíveis.")
-            self.mapmode = False
 
     def upgrade_province(self, player_m, province=None):
         if province == None:

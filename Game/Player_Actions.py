@@ -1,12 +1,13 @@
-from Game.Game import Game
 from Player import Player
 from IA.IA import IA
+from multipledispatch import dispatch
 
 
 class Player_Action():
-    def __init__(self, game: Game):
+    def __init__(self, game):
         self.game = game
 
+    @dispatch(Player)
     def action(self, player: Player):
         if self.game.mapmode:
             self.game.print_map()
@@ -29,6 +30,7 @@ class Player_Action():
         else:
             print("Invalid action. Try again.")
 
+    @dispatch(IA)
     def action(self, IA: IA):
         act, var = IA.act_do()
         if act == "Move":

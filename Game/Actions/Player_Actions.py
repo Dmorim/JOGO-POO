@@ -1,16 +1,28 @@
 from Player import Player
 from IA.IA import IA
+from Game_Actions import Game_Action
 from multipledispatch import dispatch
 
 
 class Player_Action():
     def __init__(self, game):
         self.game = game
+        self.actions = Game_Action
+
+    def __valid_acts_choices(self, valid_answers: list = ["1", "2", "0"]) -> str:
+        act = input("Escolha uma opção: ")
+        while act not in valid_answers:
+            print("Valor inválido. Tente novamente.")
+            act = input("Escolha uma opção: ")
+        return act
+
+    def __show_valid_acts(self, valid_answers_text: str = "1 - Mover Exército\n2 - Melhorar Província\n0 - Passar"):
+        print(
+            f"Ações disponíveis:\n{valid_answers_text}"
+        )
 
     @dispatch(Player)
     def action(self, player: Player):
-        if self.game.mapmode:
-            self.game.print_map()
         print(
             f"{'='*25}\nJogador Atual: {player.get_player_name()}"
         )
@@ -18,17 +30,9 @@ class Player_Action():
             f"Pontos de Ação: {
                 round(player.get_player_actions(), 2)}\n"
         )
-        action = input("Escolha uma opção: ")
-        if action == "1":
-            self.game.army_actions(player)
-        elif action == "2":
-            self.game.upgrade_province(player)
-        elif action == "3":
-            self.game.attack_province()
-        elif action == "0":
-            return
-        else:
-            print("Invalid action. Try again.")
+        self.__show_valid_acts()
+        action_choose = self.__valid_acts_choices()
+        self.actions.action(player, action_choose)
 
     @dispatch(IA)
     def action(self, IA: IA):

@@ -1,12 +1,10 @@
-from Game.Game import Game
 from Player import Player
-from multipledispatch import dispatch
 
 
-class Game_Action():
-    def __init__(self, game: Game):
-        self.game = game
-
+class ArmyActions:
+    def __init__(self):
+        pass
+    
     def __print_available_armys(self, player: Player):
         for number, army in enumerate(player.get_available_army()):
             print(f'{number + 1}. {army.army_situation()}')
@@ -17,9 +15,10 @@ class Game_Action():
             self.__print_available_armys(player)
             try:
                 army = int(input('Selecione o exército pelo número: '))
+                if army not in range(1, len(player.get_available_army()) + 1):
+                    print("Valor inválido. Tente novamente.")
             except ValueError:
                 print("Valor inválido. Tente novamente.")
-
         return army
 
     def __show_neighbors(self, selected_army) -> str:
@@ -39,7 +38,7 @@ class Game_Action():
             case "3": return self.__attack_province
             case "0": return False
 
-    def __army_action(self, player):
+    def army_action(self, player):
         if player.get_available_army() == []:
             print("Não há exércitos disponíveis.")
             self.game.mapmode = False
@@ -54,7 +53,4 @@ class Game_Action():
             "Ações disponíveis:\n1 - Mover Exército\n2 - Dividir Exército\n3 - Curar Exército\n0 - Voltar"
         )
         army_actions = self.__army_actions_verification()
-        army_act = self.__elect_player_choice(army_actions)
-
-    def action(self, player: Player):
-        pass
+        self.__elect_player_choice(army_actions)

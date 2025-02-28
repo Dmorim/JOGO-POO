@@ -1,3 +1,4 @@
+from multipledispatch import dispatch
 
 
 class Movement:
@@ -7,10 +8,7 @@ class Movement:
         self.game = game
 
     def army_make_movement(self, selected_army, move_to, destination=None):
-        if destination is not None:
-            dest_prov = destination
-        else:
-            dest_prov = selected_army.get_province().get_neighbors()[
+        dest_prov = selected_army.get_province().get_neighbors()[
                 int(move_to) - 1
             ]
         move_needed = round(

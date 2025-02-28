@@ -55,8 +55,8 @@ class Game:
                 self.actions = Player_Action(self)
 
                 while self.current_player.can_perform_action():
-                    if self.game.mapmode:
-                        self.game.print_map()
+                    if self.mapmode:
+                        self.print_map()
                     self.actions.action(self.current_player.get_ia())
 
                 # Update game state

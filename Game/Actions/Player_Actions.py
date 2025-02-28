@@ -1,13 +1,13 @@
 from Player import Player
 from IA.IA import IA
-from Game_Actions import Game_Action
+from Game.Actions.Game_Actions import Game_Action
 from multipledispatch import dispatch
 
 
 class Player_Action():
     def __init__(self, game):
         self.game = game
-        self.actions = Game_Action
+        self.game_actions = Game_Action
 
     def __valid_acts_choices(self, valid_answers: list = ["1", "2", "0"]) -> str:
         act = input("Escolha uma opção: ")
@@ -32,7 +32,7 @@ class Player_Action():
         )
         self.__show_valid_acts()
         action_choose = self.__valid_acts_choices()
-        self.actions.action(player, action_choose)
+        self.game_actions.action(self.game_actions, player, action_choose)
 
     @dispatch(IA)
     def action(self, IA: IA):

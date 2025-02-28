@@ -1,6 +1,5 @@
 from Player import Player
-from Game_Actions_Army_Actions import ArmyActions
-from multipledispatch import dispatch
+from Game.Actions.Game_Actions_Army_Actions import ArmyActions
 
 
 class Game_Action():

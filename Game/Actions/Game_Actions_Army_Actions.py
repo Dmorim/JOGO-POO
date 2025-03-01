@@ -62,8 +62,7 @@ class ArmyActions:
     def army_action(self, player):
         if player.get_available_army() == []:
             print("Não há exércitos disponíveis.")
-            self.game.mapmode = False
-            return
+            return False
 
         print("Exércitos disponíveis: ")
 

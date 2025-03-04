@@ -79,6 +79,22 @@ class Army:
     def army_situation(self):
         return f"Exército: Ataque: {self.get_attack()}, Defesa: {self.get_defense()}, Vida: {self.get_health()}. Província: {self.get_province().get_name()} {'(Em Cura)' if self.get_in_healing() else '' or '(Em Movimento)' if self.get_in_move() else ''}"
 
+    def initiate_movement(self, dest_prov, turns_to_move):
+        self.turns_to_move = turns_to_move
+        self.dest_province = dest_prov
+        self.in_move = True
+
+    def cancel_movement(self):
+        self.in_move = False
+        self.turns_to_move = None
+        self.dest_province = None
+        
+    def finish_movement(self):
+        self.in_move = False
+        self.current_province = self.dest_province
+        self.dest_province = None
+        self.turns_to_move = None
+
 
 class Army_Group(Army):
     def __init__(self, current_province, owner, attack=1, defense=1):

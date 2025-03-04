@@ -1,7 +1,6 @@
 from Army import Army_Group
 from Game.Executions.Move_Execution import Movement
 from Game.Actions.Player_Actions import Player_Action
-from multipledispatch import dispatch
 
 
 class Game:
@@ -43,16 +42,8 @@ class Game:
         self.current_player = self.players[next_index]
         self.turn_count += 1
 
-    @dispatch(str)
-    def __player_choices_treating(self, choice: str):
-        match choice:
-            case "0":
-                self.mapmode = False
-
-    @dispatch(bool)
-    def __player_choices_treating(self, choice: bool):
-        if not choice:
-            self.mapmode = False
+    def turn_pass(self):
+        return True if self.current_player.can_perform_action() and self.player_skip == False else False
 
     def play(self):
         # Main game loop
@@ -60,17 +51,17 @@ class Game:
             # Perform player actions
             for player in self.players:
                 self.current_player = player
-                player.actions += 3
+                self.current_player.actions += 3
                 self.mapmode = True
+                self.player_skip = False
                 self.army_move_points()
                 self.actions = Player_Action(self)
 
-                while self.current_player.can_perform_action():
+                while self.turn_pass():
                     if self.mapmode:
                         self.print_map()
-                    player_mode = self.actions.action(
-                        self.current_player.get_ia())
-                    self.__player_choices_treating(player_mode)
+                    self.actions.action(
+                        self.current_player.get_ia(), self.mapmode)
 
                 # Update game state
 

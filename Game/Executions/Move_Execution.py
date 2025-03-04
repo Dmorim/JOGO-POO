@@ -7,11 +7,19 @@ class Movement:
         self.friendly_territory_modifier = friendly_territory_mod
         self.game = game
 
-    def army_make_movement(self, selected_army, move_to, destination=None):
-        dest_prov = selected_army.get_province().get_neighbors()[
-                int(move_to) - 1
-            ]
-        move_needed = round(
+    def __calculate_necessary_movement(self, selected_army, dest_prov) -> float:
+        """
+        A função calcula quantos pontos são necessários para mover um exército de uma província para outra.
+        Utiliza a fórmula: (movimento necessário da província de origem * modificador de terreno da província de origem) + (movimento necessário da província de destino * modificador de terreno da província de destino * modificador de território inimigo se a província de destino não pertencer ao jogador)
+
+        Args:
+            selected_army (army): Exército selecionado para se mover
+            dest_prov (province): Província de destino
+
+        Returns:
+            float: Pontuação total arredondada.
+        """
+        score = round(
             (
                 selected_army.get_province().get_move_req()
                 * selected_army.get_province().get_terrain().get_move_modifier()
@@ -25,58 +33,64 @@ class Movement:
             ),
             0,
         )
+        return score
+
+    def __calculate_turns_to_move(self, selected_army, dest_prov) -> float:
+        """
+        Função responsável por calcular quantos turnos são necessários para mover um exército de uma província para outra.
+        Divide o movimento necessário pelo número de pontos de movimento do exército.
+        Args:
+            selected_army (army): Exército selecionado para se mover
+            dest_prov (province): Província de destino
+
+        Returns:
+            float: Numero total de turnos arredondado.
+        """
+        move_needed = self.__calculate_necessary_movement(
+            selected_army, dest_prov)
         move_points = selected_army.get_move_points()
         turns_to_move = round(move_needed / move_points, 0)
-        self.game.current_player.action_move_army()
-        selected_army.turns_to_move = turns_to_move
-        selected_army.dest_province = dest_prov
-        selected_army.in_move = True
+        return turns_to_move
 
+    def __set_army_in_move(self, selected_army, dest_prov, turns_to_move):
+        """
+        Realiza os procedimentos para setar um exército em movimento dentro do jogo.
+        Deduz os pontos de ação do jogador, seta a província de destino, os turnos necessários para chegar e o status de movimento do exército.
+        Args:
+            selected_army (army): Exército selecionado para se mover
+            dest_prov (province): Província de destino
+            turns_to_move (integer): Quantidade de turnos necessários para chegar na província de destino
+        """
+        selected_army.get_owner().action_move_army()
+        selected_army.initiate_movement(dest_prov, turns_to_move)
+
+    def army_make_movement(self, selected_army, dest_prov):
+        """Função chamada para mover um exército de uma província para outra.
+
+        Args:
+            selected_army (army): Exército selecionado para se mover
+            dest_prov (province): Província de destino
+        """
+        turns_to_move = self.__calculate_turns_to_move(
+            selected_army, dest_prov)
+        self.__set_army_in_move(selected_army, dest_prov, turns_to_move)
         print(
             f"Exército em movimento para {selected_army.dest_province.get_name()}. Faltam {
                 selected_army.turns_to_move} turnos para chegar."
         )
 
-    def army_movement(self, player_m, selected_army):
-        if selected_army.in_move:
-            print(
-                f"Exército em movimento para {selected_army.dest_province.get_name()}. Faltam {
-                    selected_army.turns_to_move} turnos para chegar."
-            )
-            print("Ações disponíveis:\n1 - Cancelar Movimento\n0 - Voltar")
-            action = input()
-            if action == "1":
-                selected_army.in_move = False
-                selected_army.turns_to_move = None
-                selected_army.dest_province = None
-                print("Movimento cancelado.")
-                self.mapmode = False
+    def cancel_army_movement(self, selected_army):
+        """Função chamada para cancelar o movimento de um exército.
 
-            if action == "0":
-                pass
-            return
+        Args:
+            selected_army (army): Exército selecionado para cancelar o movimento
+        """
+        selected_army.cancel_movement()
+        self.game.mapmode = False
+        print("Movimento cancelado.")
 
-        if selected_army.get_in_healing():
-            print("Exército em cura. Não é possível mover.")
-            self.mapmode = False
-            return
-
-        print("Selecione a província de destino do exército:")
-        for neighbor in selected_army.get_province().get_neighbors():
-            print(
-                f"{neighbor.get_name()}, {neighbor.get_terrain().get_terrain_name()}: ({
-                    selected_army.get_province().get_neighbors().index(neighbor) + 1}) "
-            )
-        move_to = input()
-        if int(move_to) <= len(selected_army.get_province().get_neighbors()) + 1:
-            cond = player_m.action_move_army()
-            if cond:
-                self.army_make_movement(selected_army, move_to)
-                if player_m.get_player_actions() > 0:
-                    self.mapmode = False
-        else:
-            print("Província inválida")
-            self.mapmode = False
+    def forced_march(self):
+        print("Em Desenvolvimento")
 
     def update_movement_turns(self, player_m):
         for army in player_m.get_army_in_move():
@@ -89,11 +103,6 @@ class Movement:
             if province.get_dom_turns() > 0:
                 province.update_dom_turns()
 
-    def cancel_movement(self, selected_army):
-        selected_army.in_move = False
-        selected_army.turns_to_move = None
-        selected_army.dest_province = None
-
     def verify_battle(self, selected_army):
         if selected_army.dest_province.get_in_battle():
             for battle in self.game.ongoing_battles:
@@ -102,7 +111,7 @@ class Movement:
                         battle.get_off_army_owner() != selected_army.get_owner()
                         and battle.get_def_army_owner() != selected_army.get_owner()
                     ):
-                        self.cancel_movement(selected_army)
+                        selected_army.cancel_movement()
                         return False
         return True
 

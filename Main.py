@@ -137,6 +137,7 @@ class Main:
                 america_add_provinces(player)
 
         add_neighbors()
+        player1.army_creation(player1.provinces[0])
         # Start game
         game.start()
 

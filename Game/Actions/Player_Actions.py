@@ -7,7 +7,7 @@ from multipledispatch import dispatch
 class Player_Action():
     def __init__(self, game):
         self.game = game
-        self.game_actions = Game_Action()
+        self.game_actions = Game_Action(self.game)
 
     def __valid_acts_choices(self, valid_answers: list = ["1", "2", "0"]) -> str:
         act = input("Escolha uma opção: ")
@@ -16,13 +16,12 @@ class Player_Action():
             act = input("Escolha uma opção: ")
         return act
 
-    def __show_valid_acts(self, valid_answers_text: str = "1 - Mover Exército\n2 - Melhorar Província\n0 - Passar"):
+    def __show_valid_acts(self, player, valid_answers_text: str = "1 - Ações com Exército\n2 - Melhorar Província\n0 - Passar"):
         print(
-            f"Ações disponíveis:\n{valid_answers_text}"
+            f"Ações disponíveis:\n{valid_answers_text}\nPontos de Ação: {round(player.get_player_actions(), 2)}\n{'='*25}"
         )
 
-    @dispatch(Player)
-    def action(self, player: Player):
+    def __show_initial_screen(player: Player):
         print(
             f"{'='*25}\nJogador Atual: {player.get_player_name()}"
         )
@@ -30,12 +29,17 @@ class Player_Action():
             f"Pontos de Ação: {
                 round(player.get_player_actions(), 2)}\n"
         )
-        self.__show_valid_acts()
-        action_choose = self.__valid_acts_choices()
-        return self.game_actions.action(player, action_choose)
 
-    @dispatch(IA)
-    def action(self, IA: IA):
+    @dispatch(Player, bool)
+    def action(self, player: Player, state: bool):
+        if state:
+            self.__show_initial_screen
+        self.__show_valid_acts(player)
+        action_choose = self.__valid_acts_choices()
+        self.game_actions.action(player, action_choose)
+
+    @dispatch(IA, bool)
+    def action(self, IA: IA, state: bool):
         act, var = IA.act_do()
         if act == "Move":
             province = var[0][0]

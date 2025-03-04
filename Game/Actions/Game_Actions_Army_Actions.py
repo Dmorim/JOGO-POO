@@ -1,66 +1,103 @@
 from Player import Player
+from Game.Executions.Move_Execution import Movement
 
 
 class ArmyActions:
-    def __init__(self):
-        pass
+    def __init__(self, game):
+        self.game = game
+        self.army_movement = Movement(self.game)
 
     def __print_available_armys(self, player: Player):
-        for number, army in enumerate(player.get_available_army()):
+        for number, army in enumerate(player.no_battle_armies()):
             print(f'{number + 1}. {army.army_situation()}')
         print('0. Voltar')
 
     def __selected_army_verification(self, player: Player) -> int:
         army = None
-        while (army not in range(1, len(player.get_available_army()) + 1)) or army == 0:
+        while True:
             self.__print_available_armys(player)
             try:
                 army = int(input('Selecione o exército pelo número: '))
-                if army not in range(1, len(player.get_available_army()) + 1):
+                if army in range(1, len(player.no_battle_armies()) + 1) or army == 0:
+                    return army
+                else:
                     print("Valor inválido. Tente novamente.")
             except ValueError:
                 print("Valor inválido. Tente novamente.")
-        return army
 
     def __show_neighbors(self, selected_army) -> str:
         return f"Província atual: {selected_army.get_province().get_name()}, Vizinhos: {', '.join(neighbor.get_name() for neighbor in selected_army.get_province().get_neighbors())}"
 
-    def __army_actions_verification(self, valid_answers: list = ["1", "2", "3", "0"]) -> str:
-        army_actions = input('Escollha uma ação: ')
-        while army_actions not in valid_answers:
-            print("Valor inválido. Tente novamente.")
-            army_actions = input('Escollha uma ação: ')
-        return army_actions
+    def __army_actions_verification(self, army) -> int:
+        HEALING_ACTIONS = ["1", "0"]
+        MOVE_ACTIONS = ["1", "2", "0"]
+        DEFAULT_ACTIONS = ["1", "2", "3", "0"]
+
+        if army.get_in_healing():
+            valid_answers = HEALING_ACTIONS
+        elif army.get_in_move():
+            valid_answers = MOVE_ACTIONS
+        else:
+            valid_answers = DEFAULT_ACTIONS
+
+        while True:
+            army_actions = input('Escolha uma ação: ')
+            if army_actions in valid_answers:
+                return army_actions
+            else:
+                print("Valor inválido. Tente novamente. Ações válidas são: ",
+                      ", ".join(valid_answers))
 
     def __show_neighbors_to_choose(self, army):
         for number, province in enumerate(army.get_province().get_neighbors()):
-            print(f'{number + 1}. {province.get_name()}')
-        print('0. Voltar')
+            print(
+                f'{number + 1}. {province.get_name()} - {province.get_terrain().get_terrain_name()}')
 
-    def __province_choose(self, army):
+    def __province_choose(self, army) -> int:
         self.__show_neighbors_to_choose(army)
         choose_province = None
-        while (choose_province not in range(1, len(army.get_province().get_neighbors()) + 1)) or choose_province == 0:
+        while True:
             try:
                 choose_province = int(input('Escolha a província: '))
-                if choose_province not in range(1, len(army.get_province().get_neighbors()) + 1):
+                if choose_province in range(1, len(army.get_province().get_neighbors()) + 1):
+                    return choose_province
+                else:
                     print("Valor inválido. Tente novamente.")
             except ValueError:
                 print("Valor inválido. Tente novamente.")
-        return choose_province
+
+    def __dynamic_actions_available(self, army) -> str:
+        if army.get_in_healing():
+            return "Ações Disponíveis: \n1 - Cancelar Cura\n0 - Voltar"
+        elif army.get_in_move():
+            return "Ações Disponíveis: \n1 - Cancelar Movimento\n2- Marcha Forçada\n0 - Voltar"
+        else:
+            return "Ações Disponíveis: \n1 - Mover Exército\n2 - Dividir Exército\n3 - Curar Exército\n0 - Voltar"
+
+    def __elect_player_choice(self, action: str, army, player):
+        if army.get_in_healing():
+            match action:
+                case "1": self.__army.set_in_healing()
+                case "0": False
+        elif army.get_in_move():
+            match action:
+                case "1": self.army_movement.cancel_army_movement(army)
+                case "2": self.army_movement.forced_march()
+                case "0": False
+        else:
+            match action:
+                case "1": self.__army_move(army),
+                case "2": self.__upgrade_province,
+                case "3": self.__attack_province
+                case "0": self.army_action(player)
 
     def __army_move(self, army):
-        choosen_province = self.__province_choose(army)
-
-    def __elect_player_choice(self, action: str, army):
-        match action:
-            case "1": return self.__army_move(army),
-            case "2": return self.__upgrade_province,
-            case "3": return self.__attack_province
-            case "0": return False
+        choosen_province = army.get_province().get_neighbors()[
+            self.__province_choose(army) - 1]
+        self.army_movement.army_make_movement(army, choosen_province)
 
     def army_action(self, player):
-        if player.get_available_army() == []:
+        if player.no_battle_armies() == []:
             print("Não há exércitos disponíveis.")
             return False
 
@@ -68,11 +105,13 @@ class ArmyActions:
 
         selected_army_index = self.__selected_army_verification(player)
         if selected_army_index == 0:
-            return
+            self.game.mapmode = False
+            return False
         selected_army = player.armys[selected_army_index - 1]
         print(self.__show_neighbors(selected_army))
+
         print(
-            "Ações disponíveis:\n1 - Mover Exército\n2 - Dividir Exército\n3 - Curar Exército\n0 - Voltar"
+            self.__dynamic_actions_available(selected_army)
         )
-        army_actions = self.__army_actions_verification()
-        self.__elect_player_choice(army_actions)
+        self.__elect_player_choice(
+            self.__army_actions_verification(selected_army), selected_army, player)

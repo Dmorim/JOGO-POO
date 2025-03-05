@@ -1,11 +1,13 @@
 from Player import Player
 from Game.Executions.Move_Execution import Movement
+from Game.Executions.Army_Execution import Army_Execution
 
 
 class ArmyActions:
     def __init__(self, game):
         self.game = game
         self.army_movement = Movement(self.game)
+        self.army_execution = Army_Execution(self.game)
 
     def __print_available_armys(self, player: Player):
         for number, army in enumerate(player.no_battle_armies()):
@@ -87,7 +89,7 @@ class ArmyActions:
         else:
             match action:
                 case "1": self.__army_move(army),
-                case "2": self.__upgrade_province,
+                case "2": self.army_execution.army_division(player, army),
                 case "3": self.__attack_province
                 case "0": self.army_action(player)
 

@@ -88,7 +88,7 @@ class Army:
         self.in_move = False
         self.turns_to_move = None
         self.dest_province = None
-        
+
     def finish_movement(self):
         self.in_move = False
         self.current_province = self.dest_province
@@ -131,17 +131,9 @@ class Army_Group(Army):
         for army in self.armys:
             army.health -= round(damage, 2)
 
-    def split_group(self):
-        print("Informe a quantidade de exércitos que deseja dividir: ")
-        quant = int(input())
-        if quant >= len(self.armys):
-            print("Quantidade de exércitos maior que a quantidade atual.")
-            return
-        if quant <= 0:
-            print("Quantidade de exércitos inválida.")
-            return
+    def split_group(self, quantity):
         new_group = Army_Group(self.current_province, self.owner)
-        for i in range(quant):
+        for i in range(quantity):
             new_group.add_army(self.armys.pop())
 
         return new_group
@@ -164,7 +156,7 @@ class Army_Group(Army):
     def get_neighbours_provinces(self):
         return self.current_province.get_neighbors()
 
-    def get_army_quant(self):
+    def get_army_quant(self) -> int:
         quant = 0
         for army in self.armys:
             quant += army.get_army_quant()

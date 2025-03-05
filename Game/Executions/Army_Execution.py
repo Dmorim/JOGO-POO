@@ -1,9 +1,12 @@
-from Army import Army_Group
+from multipledispatch import dispatch
+
+from Army import Army, Army_Group
+from Player import Player
 
 
 class Army_Execution:
-    def __init__(self):
-        pass
+    def __init__(self, game):
+        self.game = game
 
     def group_army(self, player_m):
         for province in player_m.provinces:
@@ -50,21 +53,29 @@ class Army_Execution:
                         player_m.armys.remove(army)
         return
 
-    def army_split(self, player_m, selected_army):
-        if selected_army.get_in_move():
-            print("Exército em movimento. Não é possível dividir.")
-            return
-        if selected_army.get_in_healing():
-            print("Exército em cura. Não é possível dividir.")
-            return
-        if isinstance(selected_army, Army_Group):
-            army = selected_army.split_group()
-            if army is not None:
-                player_m.armys.append(army)
-                self.mapmode = False
-        else:
-            print("Exército não é um grupo.")
-            return
+    def __army_division_quantity(self, selected_army):
+        try:
+            quantity = int(
+                input("Quantidade do novo exército: "))
+        except ValueError:
+            print("Valor inválido.")
+            return self.__army_division_quantity(selected_army)
+        if quantity <= 0 or quantity >= selected_army.get_army_quant():
+            print("Valor inválido.")
+            return self.__army_division_quantity(selected_army)
+        return quantity
+
+    @dispatch(Player, Army)
+    def army_division(self, player_m: Player, selected_army: Army):
+        self.game.mapmode = False
+        return print("Não é possível divisão para esse exército")
+
+    @dispatch(Player, Army_Group)
+    def army_division(self, player_m: Player, selected_army: Army_Group):
+        quantity = self.__army_division_quantity(selected_army)
+        new_army = selected_army.split_group(quantity)
+        player_m.armys.append(new_army)
+        self.game.mapmode = False
         return
 
     def heal_army(self, selected_army):

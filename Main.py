@@ -138,6 +138,7 @@ class Main:
 
         add_neighbors()
         player1.army_creation(player1.provinces[0])
+        player1.armys[0].health_damage(5)
         # Start game
         game.start()
 

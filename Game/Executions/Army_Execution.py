@@ -78,32 +78,35 @@ class Army_Execution:
         self.game.mapmode = False
         return
 
-    def heal_army(self, selected_army):
+    def __army_act_healing_verification(self, selected_army):
         if selected_army.get_in_move():
-            print("Exército em movimento. Não é possível curar.")
-            self.mapmode = False
-            return
-        if selected_army.get_in_healing():
-            print("Exército já está em cura. Deseja cancelar? (S/N)")
-            if input().lower() == "s":
-                selected_army.set_in_healing(False)
-                print("Cura cancelada.")
-            elif input().lower() == "n":
-                pass
-            else:
-                print("Comando inválido.")
-            self.mapmode = False
-            return
+            print("Exército em movimento. Não é possível realizar a ação.")
+            return False
         if selected_army.get_health() == selected_army.get_max_health():
             print("Exército já está com vida máxima.")
-            self.mapmode = False
+            return False
+        return True
+
+    def cancel_healing(self, selected_army):
+        while True:
+            print("Deseja cancelar a cura? (S/N)")
+            answer = input().lower()
+            if answer == "s":
+                selected_army.set_in_healing(False)
+                print("Cura cancelada.")
+                break
+            elif answer == "n":
+                break
+            else:
+                print("Comando inválido.")
+
+    def heal_army(self, selected_army):
+        # Verifica se a situação do exército é valida
+        if not self.__army_act_healing_verification(selected_army):
+            self.game.mapmode = False
             return
-        if selected_army.get_province().get_in_battle():
-            print("Exército em batalha, não é possível curar ele")
-            self.mapmode = False
-            return
-        selected_army.set_in_healing(True)
-        selected_army.get_owner().action_heal_army()
+        selected_army.set_in_healing(True)  # Põe o exército em cura
+        selected_army.get_owner().action_heal_army()  # Deduz a pontuação de ação
         print("Exército em cura.")
-        self.mapmode = False
+        self.game.mapmode = False  # Desativa o modo de mapa
         return

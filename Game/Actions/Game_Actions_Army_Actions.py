@@ -79,18 +79,18 @@ class ArmyActions:
     def __elect_player_choice(self, action: str, army, player):
         if army.get_in_healing():
             match action:
-                case "1": self.__army.set_in_healing()
-                case "0": False
+                case "1": self.army_execution.cancel_healing(army)
+                case "0": self.army_action(player)
         elif army.get_in_move():
             match action:
                 case "1": self.army_movement.cancel_army_movement(army)
                 case "2": self.army_movement.forced_march()
-                case "0": False
+                case "0": self.army_action(player)
         else:
             match action:
                 case "1": self.__army_move(army),
                 case "2": self.army_execution.army_division(player, army),
-                case "3": self.__attack_province
+                case "3": self.army_execution.heal_army(army),
                 case "0": self.army_action(player)
 
     def __army_move(self, army):

@@ -1,4 +1,4 @@
-from Army import Army
+from Army import Army, Army_Group
 
 
 class Player:
@@ -76,6 +76,13 @@ class Player:
         army_created = Army(province, self)
         self.add_army(army_created)
 
+    def army_creation_group(self, province):
+        group = Army_Group(province, self)
+        for army in self.get_player_province(province):
+            group.add_army(army)
+            self.remove_army(army)
+        self.add_army(group)
+
     def remove_army_from_group(self, army_group: object, armies: list):
         for army in armies:
             removed = army_group.remove_army(army)
@@ -127,16 +134,6 @@ class Player:
             if not army.get_in_move() and not army.get_in_battle()
         ]
 
-    def get_available_province(self):
-        return [
-            province
-            for province in self.provinces
-            if not province.get_in_battle()
-            and province.get_owner() == self
-            and province.get_dom_turns() == 0
-            and province.get_level() < province.get_level_cap()
-        ]
-
     def get_no_healing_armys(self):
         return [army for army in self.armys if not army.get_in_healing()]
 
@@ -149,4 +146,15 @@ class Player:
             for province in self.provinces
             if province.get_owner() == self
             and province.is_upgradeable()
+        ]
+
+    def province_available_to_upgrade(self):
+        return [
+            province
+            for province in self.provinces
+            if not province.get_in_battle()
+            and province.get_owner() == self
+            and province.get_dom_turns() == 0
+            and province.get_level() < province.get_level_cap()
+            and self.get_upgrade_cost(province) <= self.actions
         ]

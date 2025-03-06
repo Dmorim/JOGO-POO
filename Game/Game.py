@@ -65,7 +65,6 @@ class Game:
 
                 # Update game state
 
-                self.army_creation(self.current_player)
                 self.moviment.update_movement_turns(self.current_player)
                 self.update_battles()
                 self.group_army(self.current_player)
@@ -79,35 +78,6 @@ class Game:
             army.move_points = self.const_army_move_points
             if army.in_move:
                 army.move_points = 0
-
-    def army_creation(self, player_m):
-        for province in player_m.get_player_province():
-            province.produce_army()
-
-    def upgrade_province(self, player_m, province=None):
-        if province == None:
-            index_list = [
-                player_m.get_available_province().index(province) + 1
-                for province in player_m.get_available_province()
-            ]
-            up_prov = input(
-                f"Selecione a província para ser melhorada: {[f'{province.get_name()} ({player_m.get_upgrade_cost(province)}), [{
-                    player_m.get_available_province().index(province) + 1}]' for province in player_m.get_available_province()]} "
-            )
-            if int(up_prov) in index_list:
-                action = player_m.action_upgrade_province(
-                    player_m.get_available_province(
-                    )[index_list.index(int(up_prov))]
-                )
-                if action:
-                    player_m.get_available_province()[
-                        index_list.index(int(up_prov))
-                    ].upgrade()
-                else:
-                    print("Não há pontos de ação suficientes para realizar a ação.")
-                    self.mapmode = False
-        else:
-            province.upgrade()
 
     def print_map(self):
         # Print the map with province ownership and armies

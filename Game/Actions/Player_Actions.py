@@ -10,11 +10,10 @@ class Player_Action():
         self.game_actions = Game_Action(self.game)
 
     def __valid_acts_choices(self, valid_answers: list = ["1", "2", "0"]) -> str:
-        act = input("Escolha uma opção: ")
-        while act not in valid_answers:
-            print("Valor inválido. Tente novamente.")
+        while True:
             act = input("Escolha uma opção: ")
-        return act
+            if act in valid_answers:
+                return act
 
     def __show_valid_acts(self, player, valid_answers_text: str = "1 - Ações com Exército\n2 - Melhorar Província\n0 - Passar"):
         print(

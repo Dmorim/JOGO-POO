@@ -1,16 +1,16 @@
 class Province:
-    def __init__(self, name, current_owner, terrain, move_req=10):
+    def __init__(self, name, current_owner, terrain, move_req=10, levelcap=5, army_requisition=1):
         self.name = name
         self.current_owner = current_owner
         self.terrain_type = terrain
         self.neighbor_provinces = []
         self.army_progress = 0
         self.level = 1
-        self.level_cap = 5
+        self.level_cap = levelcap
         self.move_req = move_req
         self.in_battle = False
         self.dom_turns = 0
-        self.create_army_requisition = 1
+        self.create_army_requisition = army_requisition
         self.turns_under_control = 0
 
         self.level_defence_modifiers = {
@@ -22,7 +22,8 @@ class Province:
                 self.level += 1
 
     def produce_army(self):
-        self.army_progress += self.level
+        if self.dom_turns == 0:
+            self.army_progress += self.level
         if self.army_progress >= self.create_army_requisition:
             if not self.get_in_battle():
                 if self.dom_turns == 0:
@@ -94,3 +95,6 @@ class Province:
 
     def is_upgradeable(self):
         return self.level < self.level_cap and self.dom_turns == 0
+
+    def armys_in_province(self) -> int:
+        return len(self.get_owner.get_armys_in_province(self))

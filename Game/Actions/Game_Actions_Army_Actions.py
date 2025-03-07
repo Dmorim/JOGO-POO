@@ -1,13 +1,14 @@
 from Player import Player
+from Game.Game_State import Game_State
 from Game.Executions.Move_Execution import Movement
 from Game.Executions.Army_Execution import Army_Execution
 
 
 class ArmyActions:
-    def __init__(self, game):
-        self.game = game
-        self.army_movement = Movement(self.game)
-        self.army_execution = Army_Execution(self.game)
+    def __init__(self):
+        self.game_state = Game_State()
+        self.army_movement = Movement()
+        self.army_execution = Army_Execution()
 
     def __print_available_armys(self, player: Player):
         for number, army in enumerate(player.no_battle_armies()):
@@ -107,7 +108,7 @@ class ArmyActions:
 
         selected_army_index = self.__selected_army_verification(player)
         if selected_army_index == 0:
-            self.game.mapmode = False
+            self.game_state.mapmode = False
             return False
         selected_army = player.armys[selected_army_index - 1]
         print(self.__show_neighbors(selected_army))

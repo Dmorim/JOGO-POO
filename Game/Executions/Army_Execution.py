@@ -2,11 +2,12 @@ from multipledispatch import dispatch
 
 from Army import Army, Army_Group
 from Player import Player
+from Game.Game_State import Game_State
 
 
 class Army_Execution:
-    def __init__(self, game):
-        self.game = game
+    def __init__(self):
+        self.game_state = Game_State()
 
     def group_army(self, player_m):
         for province in player_m.provinces:
@@ -67,7 +68,7 @@ class Army_Execution:
 
     @dispatch(Player, Army)
     def army_division(self, player_m: Player, selected_army: Army):
-        self.game.mapmode = False
+        self.game_state.mapmode = False
         return print("Não é possível divisão para esse exército")
 
     @dispatch(Player, Army_Group)
@@ -75,7 +76,7 @@ class Army_Execution:
         quantity = self.__army_division_quantity(selected_army)
         new_army = selected_army.split_group(quantity)
         player_m.armys.append(new_army)
-        self.game.mapmode = False
+        self.game_state.mapmode = False
         return
 
     def __army_act_healing_verification(self, selected_army):
@@ -103,10 +104,10 @@ class Army_Execution:
     def heal_army(self, selected_army):
         # Verifica se a situação do exército é valida
         if not self.__army_act_healing_verification(selected_army):
-            self.game.mapmode = False
+            self.game_state.mapmode = False
             return
         selected_army.set_in_healing(True)  # Põe o exército em cura
         selected_army.get_owner().action_heal_army()  # Deduz a pontuação de ação
         print("Exército em cura.")
-        self.game.mapmode = False  # Desativa o modo de mapa
+        self.game_state.mapmode = False  # Desativa o modo de mapa
         return

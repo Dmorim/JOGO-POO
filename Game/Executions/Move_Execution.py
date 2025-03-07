@@ -1,11 +1,13 @@
 from multipledispatch import dispatch
 
+from Game.Game_State import Game_State
+
 
 class Movement:
-    def __init__(self, game, enemy_territory_mod=1.60, friendly_territory_mod=1):
+    def __init__(self, enemy_territory_mod=1.60, friendly_territory_mod=1):
         self.enemy_territory_modifier = enemy_territory_mod
         self.friendly_territory_modifier = friendly_territory_mod
-        self.game = game
+        self.game_state = Game_State()
 
     def __calculate_necessary_movement(self, selected_army, dest_prov) -> float:
         """
@@ -86,7 +88,7 @@ class Movement:
             selected_army (army): Exército selecionado para cancelar o movimento
         """
         selected_army.cancel_movement()
-        self.game.mapmode = False
+        self.game_state.mapmode = False
         print("Movimento cancelado.")
 
     def forced_march(self):

@@ -1,12 +1,12 @@
 from Player import Player
-from Province import Province
+from Game.Game_State import Game_State
 from Game.Executions.Province_Execution import Province_Execution
 
 
 class Upgrade_Province:
-    def __init__(self, game):
-        self.game = game
-        self.province_execution = Province_Execution(self.game)
+    def __init__(self):
+        self.game_state = Game_State()
+        self.province_execution = Province_Execution()
 
     def __show_available_province(self, player: Player):
         for number, province in enumerate(player.province_available_to_upgrade()):
@@ -30,7 +30,7 @@ class Upgrade_Province:
         print('Províncias disponíveis para melhoria:')
         province_index = self.__selected_province_verification(player)
         if province_index == 0:
-            self.game.mapmode = False
+            self.game_state.mapmode = False
             return
         self.province_execution.upgrade_province(
             player, player.province_available_to_upgrade()[province_index - 1])

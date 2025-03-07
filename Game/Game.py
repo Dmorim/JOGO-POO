@@ -1,18 +1,17 @@
 from Army import Army_Group
 from Game.Executions.Move_Execution import Movement
 from Game.Actions.Player_Actions import Player_Action
+from Game.Game_State import Game_State
 
 
 class Game:
-
     def __init__(self):
         self.players = []
         self.current_player = None
-        self.mapmode = True
         self.turn_count = 0
         self.ongoing_battles = []
         self.finished_battles = []
-        self.movement = Movement(self)
+        self.state = Game_State()
         self.const_army_move_points = 5
 
     def add_player(self, player):
@@ -43,7 +42,7 @@ class Game:
         self.turn_count += 1
 
     def turn_pass(self):
-        return True if self.current_player.can_perform_action() and self.player_skip == False else False
+        return True if self.current_player.can_perform_action() and self.state.player_skip == False else False
 
     def play(self):
         # Main game loop
@@ -52,16 +51,15 @@ class Game:
             for player in self.players:
                 self.current_player = player
                 self.current_player.actions += 3
-                self.mapmode = True
-                self.player_skip = False
+                self.state.mapmode = True
                 self.army_move_points()
-                self.actions = Player_Action(self)
+                self.actions = Player_Action()
 
                 while self.turn_pass():
-                    if self.mapmode:
+                    if self.state.mapmode:
                         self.print_map()
                     self.actions.action(
-                        self.current_player.get_ia(), self.mapmode)
+                        self.current_player.get_ia(), self.state.mapmode)
 
                 # Update game state
 

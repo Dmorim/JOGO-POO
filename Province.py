@@ -1,3 +1,7 @@
+from Army import Army, Army_Group
+from multipledispatch import dispatch
+
+
 class Province:
     def __init__(self, name, current_owner, terrain, move_req=10, levelcap=5, army_requisition=1):
         self.name = name
@@ -98,3 +102,7 @@ class Province:
 
     def armys_in_province(self) -> int:
         return len(self.get_owner.get_armys_in_province(self))
+
+    def group_army(self, armys):
+        for army in armys:
+            if isinstance(army, Army_Group):

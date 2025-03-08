@@ -36,6 +36,8 @@ class Army:
 
     def heal_army_action(self):
         self.health += self.heal_army_value()
+        if self.health >= self.max_health:
+            self.in_healing = False
 
     def set_province(self, province):
         self.current_province = province
@@ -94,6 +96,15 @@ class Army:
         self.current_province = self.dest_province
         self.dest_province = None
         self.turns_to_move = None
+
+    def set_moving_points(self, pontuation: int) -> None:
+        if self.in_move:
+            self.move_points = 0
+            return
+        self.move_points = pontuation
+        
+    def army_is_availble(self) -> bool:
+        return not self.in_move and not self.in_battle and not self.in_healing
 
 
 class Army_Group(Army):

@@ -94,29 +94,6 @@ class Movement:
     def forced_march(self):
         print("Em Desenvolvimento")
 
-    def update_movement_turns(self, player_m):
-        for army in player_m.get_army_in_move():
-            if self.verify_battle(army):
-                army.turns_to_move -= 1
-                if army.turns_to_move == 0:
-                    self.army_into_province(army)
-
-        for province in player_m.provinces:
-            if province.get_dom_turns() > 0:
-                province.update_dom_turns()
-
-    def verify_battle(self, selected_army):
-        if selected_army.dest_province.get_in_battle():
-            for battle in self.game.ongoing_battles:
-                if battle.get_province() == selected_army.dest_province:
-                    if (
-                        battle.get_off_army_owner() != selected_army.get_owner()
-                        and battle.get_def_army_owner() != selected_army.get_owner()
-                    ):
-                        selected_army.cancel_movement()
-                        return False
-        return True
-
     def army_into_province(self, selected_army):
         selected_army.in_move = False
         selected_army.current_province = selected_army.dest_province

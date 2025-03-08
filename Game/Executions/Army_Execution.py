@@ -9,51 +9,6 @@ class Army_Execution:
     def __init__(self):
         self.game_state = Game_State()
 
-    def group_army(self, player_m):
-        for province in player_m.provinces:
-            armies = [
-                army
-                for army in player_m.armys
-                if army.get_province() == province and army.get_in_move() == False
-            ]
-
-            if len(armies) > 1:
-                group = None
-                for army in armies:
-                    if isinstance(army, Army_Group):
-                        group = army
-                        break
-
-                if group is None:
-                    self.create_group_army(player_m, armies)
-
-                else:
-                    self.add_army_to_group(player_m, armies)
-
-    def create_group_army(self, player_m, armies):
-        army_group = armies[0].group_army()
-        player_m.armys.append(army_group)
-        for army in armies:
-            army_group.add_army(army)
-            player_m.armys.remove(army)
-
-    def add_army_to_group(self, player_m, armies):
-        # Check if there is an existing Army_Group
-        for army in armies:
-            if isinstance(army, Army_Group):
-                group = army
-                break
-        for army in armies:
-            if army != group:
-                if army not in group.get_armys():
-                    if not isinstance(army, Army_Group):
-                        group.add_army(army)
-                        player_m.armys.remove(army)
-                    else:
-                        army.transfer_army(group)
-                        player_m.armys.remove(army)
-        return
-
     def __army_division_quantity(self, selected_army):
         try:
             quantity = int(

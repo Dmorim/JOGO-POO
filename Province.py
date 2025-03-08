@@ -103,6 +103,5 @@ class Province:
     def armys_in_province(self) -> int:
         return len(self.get_owner.get_armys_in_province(self))
 
-    def group_army(self, armys):
-        for army in armys:
-            if isinstance(army, Army_Group):
+    def get_available_armys(self) -> list:
+        return [army for army in self.current_owner.get_armys_in_province(self) if army.army_is_availble()]

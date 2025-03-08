@@ -90,20 +90,14 @@ class Player:
                 self.add_army(army)
 
     def no_battle_province(self):
-        pov = []
-        for province in self.provinces:
-            if province.get_in_battle() is False:
-                pov.append(province)
-        return pov
+        return [province for province in self.provinces if not province.get_in_battle()]
 
     def wound_army(self):
         return [
             army
             for army in self.armys
             if army.get_health() != army.get_max_health()
-            and not army.get_in_healing()
-            and not army.get_in_move()
-            and not army.get_province().get_in_battle()
+            and army.army_is_availble()
         ]
 
     def get_ia(self):

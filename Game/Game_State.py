@@ -2,12 +2,12 @@
 
 class Game_State():
     _isInstance = None
-    
+
     def __new__(cls):
         if cls._isInstance is None:
             cls._isInstance = super().__new__(cls)
         return cls._isInstance
-    
+
     def __init__(self):
         self.__mapmode = True
         self.__player_skip = False

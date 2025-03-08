@@ -65,17 +65,9 @@ class Game:
 
                 self.moviment.update_movement_turns(self.current_player)
                 self.update_battles()
-                self.group_army(self.current_player)
-                self.turn_healing(self.current_player)
                 for province in self.current_player.get_player_province():
                     province.increment_turns_under_control()
             self.next_turn()
-
-    def army_move_points(self):
-        for army in self.current_player.get_armys():
-            army.move_points = self.const_army_move_points
-            if army.in_move:
-                army.move_points = 0
 
     def print_map(self):
         # Print the map with province ownership and armies
@@ -131,9 +123,3 @@ class Game:
                 print(f"{battle.get_last_def_damage()}\n")
                 if self.ongoing_battles.index(battle) != len(self.ongoing_battles) - 1:
                     print(f"{'='*78}\n")
-
-    def turn_healing(self, player_m):
-        for army in player_m.get_army_in_healing():
-            army.heal_army_action()
-            if army.get_health() == army.get_max_health():
-                army.set_in_healing(False)

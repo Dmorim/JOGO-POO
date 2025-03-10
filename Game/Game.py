@@ -12,7 +12,6 @@ class Game:
         self.ongoing_battles = []
         self.finished_battles = []
         self.state = Game_State()
-        self.const_army_move_points = 5
 
     def add_player(self, player):
         self.players.append(player)

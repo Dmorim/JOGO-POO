@@ -152,3 +152,6 @@ class Player:
             and province.get_level() < province.get_level_cap()
             and self.get_upgrade_cost(province) <= self.actions
         ]
+
+    def obtain_dominated_provinces(self):
+        return [province for province in self.provinces if province.get_dom_turns() > 0]

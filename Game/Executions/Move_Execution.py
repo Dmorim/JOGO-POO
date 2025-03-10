@@ -94,12 +94,3 @@ class Movement:
     def forced_march(self):
         print("Em Desenvolvimento")
 
-    def army_into_province(self, selected_army):
-        selected_army.in_move = False
-        selected_army.current_province = selected_army.dest_province
-        if selected_army.dest_province.get_in_battle():
-            self.game.check_battles(selected_army)
-        elif selected_army.dest_province.get_owner() != selected_army.get_owner():
-            self.game.check_battles(selected_army)
-        selected_army.dest_province = None
-        selected_army.turns_to_move = None

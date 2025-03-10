@@ -9,7 +9,7 @@ class Army:
         self.max_health = 10
         self.current_province = current_province
         self.owner = owner
-        self.move_points = 0
+        self.move_points = 5
         self.in_move = False
         self.in_healing = False
         self.in_battle = False
@@ -82,27 +82,24 @@ class Army:
         return f"Exército: Ataque: {self.get_attack()}, Defesa: {self.get_defense()}, Vida: {self.get_health()}. Província: {self.get_province().get_name()} {'(Em Cura)' if self.get_in_healing() else '' or '(Em Movimento)' if self.get_in_move() else ''}"
 
     def initiate_movement(self, dest_prov, turns_to_move):
+        self.set_move_points(0)
         self.turns_to_move = turns_to_move
         self.dest_province = dest_prov
         self.in_move = True
 
     def cancel_movement(self):
+        self.set_move_points(5)
         self.in_move = False
         self.turns_to_move = None
         self.dest_province = None
 
     def finish_movement(self):
+        self.set_move_points(5)
         self.in_move = False
         self.current_province = self.dest_province
         self.dest_province = None
         self.turns_to_move = None
 
-    def set_moving_points(self, pontuation: int) -> None:
-        if self.in_move:
-            self.move_points = 0
-            return
-        self.move_points = pontuation
-        
     def army_is_availble(self) -> bool:
         return not self.in_move and not self.in_battle and not self.in_healing
 

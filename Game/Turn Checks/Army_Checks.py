@@ -57,15 +57,9 @@ class ArmyChecks:
         if battle.get_off_army_owner() != army.get_owner() and battle.get_def_army_owner() != army.get_owner():
             army.cancel_movement()
 
-    def army_into_province(self, selected_army):
-        selected_army.in_move = False
-        selected_army.current_province = selected_army.dest_province
-        if selected_army.dest_province.get_in_battle():
-            self.game.check_battles(selected_army)
-        elif selected_army.dest_province.get_owner() != selected_army.get_owner():
-            self.game.check_battles(selected_army)
-        selected_army.dest_province = None
-        selected_army.turns_to_move = None
+    def army_into_province(self, army):
+        army.finish_movement()
+        self.battle_control.check_battle(army.get_province())
 
     def army_checks(self, player: Player):
         self.__army_creation(player)

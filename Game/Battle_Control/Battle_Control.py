@@ -1,7 +1,15 @@
 class BattleControl:
     def __init__(self):
-        self.ongoing_battles = {}  # Dicionário para batalhas em andamento
-        self.finished_battles = {}  # Dicionário para batalhas finalizadas
+        self.__ongoing_battles = {}  # Dicionário para batalhas em andamento
+        self.__finished_battles = {}  # Dicionário para batalhas finalizadas
+
+    @property
+    def ongoing_battles(self):
+        return self.__ongoing_battles
+
+    @property
+    def finished_battles(self):
+        return self.__finished_battles
 
     def add_ongoing_battle(self, province, battle):
         if province in self.ongoing_battles:
@@ -24,3 +32,6 @@ class BattleControl:
 
     def is_battle_finished(self, province):
         return province in self.finished_battles
+
+    def check_battle(self, province):
+        pass

@@ -1,8 +1,10 @@
 from Player import Player
 from IA.IA import IA
-from Game.Actions.Game_Actions import Game_Action
-from multipledispatch import dispatch
 from Game.Game_State import Game_State
+from Game.Actions.Game_Actions import Game_Action
+
+from multipledispatch import dispatch
+
 
 
 class Player_Action():

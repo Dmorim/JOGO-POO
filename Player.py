@@ -155,3 +155,6 @@ class Player:
 
     def obtain_dominated_provinces(self):
         return [province for province in self.provinces if province.get_dom_turns() > 0]
+    
+    def get_army_in_battle(self):
+        return [army for army in self.armys if army.get_in_battle()]

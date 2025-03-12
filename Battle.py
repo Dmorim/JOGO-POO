@@ -44,6 +44,14 @@ class Battle:
     def remove_def_army(self, army):
         self.def_army.remove(army)
 
+    def finish_battle(self):
+        for army in self.off_army:
+            army.set_in_battle(False)
+            self.off_army.remove(army)
+        for army in self.def_army:
+            army.set_in_battle(False)
+            self.def_army.remove(army)
+
     def get_off_total_health(self):
         return sum([army.get_max_health() for army in self.off_army])
 

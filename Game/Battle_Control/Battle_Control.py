@@ -1,4 +1,14 @@
+from Battle import Battle
+
+
 class BattleControl:
+    _isInstance = None
+
+    def __new__(cls):
+        if cls._isInstance is None:
+            cls._isInstance = super().__new__(cls)
+        return cls._isInstance
+
     def __init__(self):
         self.__ongoing_battles = {}  # Dicionário para batalhas em andamento
         self.__finished_battles = {}  # Dicionário para batalhas finalizadas
@@ -11,18 +21,6 @@ class BattleControl:
     def finished_battles(self):
         return self.__finished_battles
 
-    def __check_battle_owner(self, province, army):
-        battle = self.battle_control.get_ongoing_battle(
-            province)
-        if battle is not None:
-            return True if (battle.get_off_army_owner() != army.get_owner() and battle.get_def_army_owner() != army.get_owner()) else False
-        return False
-
-    def __army_cancel_movement(self, army):
-        army.cancel_movement()
-        print(
-            f"Movimento cancelado, devido a batalha em {army.get_destination_province().get_name()}, exército retornou para {army.get_province().get_name()}")
-
     def __army_into_battle(self, province, army):
         battle = self.get_ongoing_battle(province)
         if battle.get_off_army_owner() == army.get_owner():
@@ -33,7 +31,16 @@ class BattleControl:
             f"Exército de {army.get_owner().get_player_name()} entrou em batalha em {province.get_name()}")
 
     def __create_battle(self, province, army):
-        pass
+        battle = Battle(army.get_owner(), province.get_owner(), province)
+        battle.create_off_army()
+        battle.create_def_army(province.get_army())
+        self.add_ongoing_battle(province, battle)
+
+    def __return_battle_owner(self, province, army):
+        battle = self.get_ongoing_battle(province)
+        if battle.get_off_army_owner() == army.get_owner():
+            return battle.get_off_army_owner()
+        return battle.get_def_army_owner()
 
     def add_ongoing_battle(self, province, battle):
         if province in self.ongoing_battles:
@@ -44,6 +51,8 @@ class BattleControl:
         battle = self.ongoing_battles.pop(province, None)
         if battle:
             self.finished_battles[province] = battle
+        province.set_in_battle(False)
+        
 
     def get_ongoing_battle(self, province):
         return self.ongoing_battles.get(province)
@@ -57,11 +66,39 @@ class BattleControl:
     def is_battle_finished(self, province):
         return province in self.finished_battles
 
-    def check_battle(self, province, army):
-        if self.__check_battle_owner(province, army):
-            return self.__army_cancel_movement(army)
-
+    def handle_battle(self, province, army):
         if self.is_battle_ongoing(province):
             return self.__army_into_battle(province, army)
 
         self.__create_battle(province, army)
+
+    def remove_army_from_battle(self, province, army):
+        """
+        Remove um exército de uma batalha em andamento na província especificada.
+
+        Args:
+            province (Province): A província onde a batalha está ocorrendo.
+            army (Army): O exército que está sendo removido da batalha.
+
+        Returns:
+            None
+        """
+        battle = self.get_ongoing_battle(province)
+        if battle is None:
+            raise ValueError(
+                "Nenhuma batalha em andamento na província especificada")
+
+        owner = self.__return_battle_owner(province, army)
+
+        if owner == battle.get_off_army_owner():
+            if army in battle.get_off_army():
+                battle.remove_off_army(army)
+            else:
+                raise ValueError(
+                    "O exército não está na lista de exércitos atacantes")
+        else:
+            if army in battle.get_def_army():
+                battle.remove_def_army(army)
+            else:
+                raise ValueError(
+                    "O exército não está na lista de exércitos defensores")

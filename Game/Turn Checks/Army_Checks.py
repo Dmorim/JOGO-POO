@@ -62,11 +62,12 @@ class ArmyChecks:
     def __army_into_province(self, army):
         army.finish_movement()
         if army.get_province().get_owner() != army.get_owner():
-            self.battle_control.check_battle(army.get_province())
+            self.battle_control.handle_battle(army.get_province(), army)
 
     def army_checks(self, player: Player):
         self.__army_creation(player)
         self.__create_groups_of_armys(player)
         self.__turn_healing(player)
         self.__cancel_moviment_to_battle(player)
+        self.__update_movement_turns(player)
         self.__update_domination_turns(player)

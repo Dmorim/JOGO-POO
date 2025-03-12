@@ -13,6 +13,24 @@ class Army:
         self.in_move = False
         self.in_healing = False
         self.in_battle = False
+        self.__turns_to_move = None
+        self.__dest_province = None
+
+    @property
+    def turns_to_move(self):
+        return self.__turns_to_move
+
+    @turns_to_move.setter
+    def turns_to_move(self, value):
+        self.__turns_to_move = value
+
+    @property
+    def dest_province(self):
+        return self.__dest_province
+
+    @dest_province.setter
+    def dest_province(self, value):
+        self.__dest_province = value
 
     def get_attack(self):
         return self.attack
@@ -80,6 +98,10 @@ class Army:
 
     def army_situation(self):
         return f"Exército: Ataque: {self.get_attack()}, Defesa: {self.get_defense()}, Vida: {self.get_health()}. Província: {self.get_province().get_name()} {'(Em Cura)' if self.get_in_healing() else '' or '(Em Movimento)' if self.get_in_move() else ''}"
+
+    def update_turns_to_move(self):
+        if self.turns_to_move is not None or self.turns_to_move > 0:
+            self.turns_to_move -= 1
 
     def initiate_movement(self, dest_prov, turns_to_move):
         self.set_move_points(0)

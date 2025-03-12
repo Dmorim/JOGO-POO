@@ -35,12 +35,11 @@ class ArmyChecks:
         for army in player.get_army_in_healing():
             army.heal_army_action()
 
-    def update_movement_turns(self, player_m):
-        for army in player_m.get_army_in_move():
-            if self.verify_battle(army):
-                army.turns_to_move -= 1
-                if army.turns_to_move == 0:
-                    self.army_into_province(army)
+    def __update_movement_turns(self, player):
+        for army in player.get_army_in_move():
+            army.update_turns_to_move()
+            if army.turns_to_move == 0:
+                self.__army_into_province(army)
 
     def __update_domination_turns(self, player):
         for province in player.obtain_dominated_provinces:
@@ -54,12 +53,16 @@ class ArmyChecks:
     def __check_battle_owner(self, army):
         battle = self.battle_control.get_ongoing_battle(
             army.get_destination_province())
-        if battle.get_off_army_owner() != army.get_owner() and battle.get_def_army_owner() != army.get_owner():
-            army.cancel_movement()
+        if battle is not None:
+            if (battle.get_off_army_owner() != army.get_owner() and battle.get_def_army_owner() != army.get_owner()):
+                army.cancel_movement()
+                print(
+                    f"Movimento cancelado, devido a batalha em {army.get_destination_province().get_name()}, exército retornou para {army.get_province().get_name()}")
 
-    def army_into_province(self, army):
+    def __army_into_province(self, army):
         army.finish_movement()
-        self.battle_control.check_battle(army.get_province())
+        if army.get_province().get_owner() != army.get_owner():
+            self.battle_control.check_battle(army.get_province())
 
     def army_checks(self, player: Player):
         self.__army_creation(player)

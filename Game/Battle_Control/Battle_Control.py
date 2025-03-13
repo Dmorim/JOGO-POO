@@ -33,8 +33,10 @@ class BattleControl:
     def __create_battle(self, province, army):
         battle = Battle(army.get_owner(), province.get_owner(), province)
         battle.create_off_army()
-        battle.create_def_army(province.get_army())
+        battle.create_def_army()
         self.add_ongoing_battle(province, battle)
+
+        province.set_in_battle(True)
 
     def __return_battle_owner(self, province, army):
         battle = self.get_ongoing_battle(province)
@@ -50,15 +52,16 @@ class BattleControl:
     def finish_battle(self, province):
         battle = self.ongoing_battles.pop(province, None)
         if battle:
-            self.finished_battles[province] = battle
+            if province not in self.finished_battles:
+                self.finished_battles[province] = []
+            self.finished_battles[province].append(battle)
         province.set_in_battle(False)
-        
 
     def get_ongoing_battle(self, province):
         return self.ongoing_battles.get(province)
 
-    def get_finished_battle(self, province):
-        return self.finished_battles.get(province)
+    def get_finished_battles(self, province):
+        return self.finished_battles.get(province, [])
 
     def is_battle_ongoing(self, province):
         return province in self.ongoing_battles

@@ -45,7 +45,8 @@ class Battle:
         self.def_army.remove(army)
 
     def start_battle(self):
-        pass
+        battle.create_off_army()
+        battle.create_def_army()
 
     def finish_battle(self):
         for army in self.off_army:

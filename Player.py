@@ -2,6 +2,7 @@ from Army import Army, Army_Group
 
 
 class Player:
+
     def __init__(self, name: str, move_base_modifier=1.2, upgrade_base_modifier=2.0, heal_base_modifier=0.75):
         self.name = name
         self.provinces = []
@@ -155,6 +156,6 @@ class Player:
 
     def obtain_dominated_provinces(self):
         return [province for province in self.provinces if province.get_dom_turns() > 0]
-    
+
     def get_army_in_battle(self):
         return [army for army in self.armys if army.get_in_battle()]

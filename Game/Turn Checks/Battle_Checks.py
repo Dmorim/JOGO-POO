@@ -13,7 +13,7 @@ class Battle_Checks:
                 player.remove_army(army)
                 self.battle_control.remove_army_from_battle(army)
 
-    def finish_battle(self, battle: Battle):
+    def __finish_battle(self, battle: Battle):
         battle.finish_battle()
 
     def update_battles(self):

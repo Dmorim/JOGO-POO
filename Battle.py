@@ -50,10 +50,10 @@ class Battle:
         self.province.set_in_battle(True)
 
     def finish_battle(self):
-        self.remove_army_from_battle()
-        self.update_provinces_after_battle()
+        self.__remove_army_from_battle()
+        self.__update_provinces_after_battle()
 
-    def remove_army_from_battle(self):
+    def __remove_army_from_battle(self):
         for army in self.off_army:
             army.set_in_battle(False)
             self.off_army.remove(army)
@@ -61,7 +61,7 @@ class Battle:
             army.set_in_battle(False)
             self.def_army.remove(army)
 
-    def update_provinces_after_battle(self):
+    def __update_provinces_after_battle(self):
         self.province.set_current_owner(self.winner)
         self.province.set_dom_turns(3)
         self.province.reset_turns_under_control()

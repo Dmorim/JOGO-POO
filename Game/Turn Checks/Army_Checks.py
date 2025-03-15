@@ -6,7 +6,6 @@ from Game.Battle_Control import Battle_Control
 class ArmyChecks:
     def __init__(self):
         self.battle_control = Battle_Control()
-        self.constant_army_move_points = 5
 
     def __army_creation(self, player):
         for province in player.get_player_province():

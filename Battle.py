@@ -45,16 +45,29 @@ class Battle:
         self.def_army.remove(army)
 
     def start_battle(self):
-        battle.create_off_army()
-        battle.create_def_army()
+        self.create_off_army()
+        self.create_def_army()
+        self.province.set_in_battle(True)
 
     def finish_battle(self):
+        self.remove_army_from_battle()
+        self.update_provinces_after_battle()
+
+    def remove_army_from_battle(self):
         for army in self.off_army:
             army.set_in_battle(False)
             self.off_army.remove(army)
         for army in self.def_army:
             army.set_in_battle(False)
             self.def_army.remove(army)
+
+    def update_provinces_after_battle(self):
+        self.province.set_current_owner(self.winner)
+        self.province.set_dom_turns(3)
+        self.province.reset_turns_under_control()
+        self.province.set_in_battle(False)
+        self.loser.remove_province(self.province)
+        self.winner.add_province(self.province)
 
     def get_off_total_health(self):
         return sum([army.get_max_health() for army in self.off_army])

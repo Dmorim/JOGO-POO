@@ -32,10 +32,8 @@ class BattleControl:
 
     def __create_battle(self, province, army):
         battle = Battle(army.get_owner(), province.get_owner(), province)
-
+        battle.start_battle()
         self.add_ongoing_battle(province, battle)
-
-        province.set_in_battle(True)
 
     def __return_battle_owner(self, province, army):
         battle = self.get_ongoing_battle(province)

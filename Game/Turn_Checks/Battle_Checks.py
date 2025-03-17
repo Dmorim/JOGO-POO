@@ -17,6 +17,9 @@ class Battle_Checks:
         battle.finish_battle()
 
     def update_battles(self):
+        for battle in self.battle_control.get_ongoing_battles():
+            pass
+
         for battle in self.ongoing_battles:
             if battle.off_army_owner == self.current_player:
                 up_bat = battle.battle_going()

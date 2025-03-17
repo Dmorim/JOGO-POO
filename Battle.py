@@ -1,9 +1,10 @@
 import random
 from Army import Army, Army_Group
+from Province import Province
 
 
 class Battle:
-    def __init__(self, off_owner, def_owner, province):
+    def __init__(self, off_owner, def_owner, province: Province):
         self.off_army_owner = off_owner
         self.def_army_owner = def_owner
         self.province = province
@@ -153,55 +154,48 @@ class Battle:
     def turn_update(self):
         self.turns_count += 1
 
-    def off_damage(self, off_attack_stats, def_defense_stats):
+    def dice_roll(self, values: list = [1, 2, 3, 4, 5, 6]) -> float:
+        multiplier = {
+            1: 0.2,
+            2: 0.5,
+            3: 0.8,
+            4: 1.0,
+            5: 1.1,
+            6: 1.5
+        }
+        roll = random.choice(values)
+        print(f"Dado rolado: {roll}")
+        return multiplier.get(roll, 1.0)
+
+    def __calculate_offensive_off_damage(self, off_attack_stats: float) -> float:
+        return (off_attack_stats * (self.off_diff_health() * self.diff_health_multiplier)) * random.uniform(0.8, 1.6)
+
+    def __calculate_offensive_def_damage(self, def_defense_stats):
+        return (
+            def_defense_stats
+            * self.province.get_terrain().get_defence_modifier()
+            * self.province.get_defence_modifier()
+            * (self.def_diff_health() * self.diff_health_multiplier)
+            * self.dice_roll()
+        )
+
+    def off_damage(self, off_attack_stats: float, def_defense_stats: float):
         off_damage = round(
-            (
-                (
-                    (
-                        (
-                            off_attack_stats
-                            * (self.off_diff_health() * self.diff_health_multiplier)
-                        )
-                    )
-                    * random.uniform(0.8, 1.6)
-                )
-                - (
-                    (
-                        (
-                            (
-                                (
-                                    def_defense_stats
-                                    * self.province.get_terrain().get_defence_modifier()
-                                )
-                                * self.province.get_defence_modifier()
-                            )
-                            * (self.def_diff_health() * self.diff_health_multiplier)
-                        )
-                        * random.uniform(0.8, 1.4)
-                    )
-                )
-            )
-            * self.damage_multiplier,
+            ((self.__calculate_offensive_off_damage(off_attack_stats) -
+             self.__calculate_offensive_def_damage(def_defense_stats))
+             * self.damage_multiplier) * self.dice_roll(),
             2,
         )
-        """
+
         print(
-            f"Dano total do exército atacante: {off_attack_stats
-                                                * (self.off_diff_health() * self.diff_health_multiplier)} + diferença de saúde {self.off_diff_health()}"
+            f"Dano total do exército atacante: {str(off_damage)}")
+        print(
+            f"Valor base do exército atacante: {self.__calculate_offensive_off_damage(off_attack_stats)}"
         )
         print(
-            f"Valor base do exército defensor: {(def_defense_stats * self.province.get_terrain(
-            ).get_defence_modifier()) * self.province.get_defence_modifier()}"
+            f"Valor total do exército defensor: {self.__calculate_offensive_def_damage(def_defense_stats)}"
         )
-        print(
-            f"Valor total do exército defensor: {((def_defense_stats
-                                                   * self.province.get_terrain().get_defence_modifier()
-                                                   )
-                                                  * self.province.get_defence_modifier()
-                                                  )
-                                                 * (self.def_diff_health() * self.diff_health_multiplier)} + diferença de saúde {self.def_diff_health()}"
-        )
-        """
+
         return off_damage if off_damage > 0 else 0.1
 
     def def_damage(self, def_attack_stats, off_defense_stats):
@@ -214,13 +208,13 @@ class Battle:
                             * (self.def_diff_health() * self.diff_health_multiplier)
                         )
                     )
-                    * random.uniform(0.6, 1.3)
+                    * self.dice_roll()
                 )
                 - (
                     (
                         off_defense_stats
                         * (self.off_diff_health() * self.diff_health_multiplier)
-                        * random.uniform(0.5, 1.1)
+                        * self.dice_roll()
                     )
                 )
             )
@@ -315,9 +309,6 @@ class Battle:
         for army in self.def_army:
             army.health_damage(off_unit_damage)
 
-        check = self.health_check()
-        if check:
-            return True
         return False
 
 
@@ -350,18 +341,18 @@ if __name__ == "__main__":
     teste.add_off_army(army_off2)
     teste.add_off_army(army_off3)
     teste.add_off_army(army_off4)
-    # teste.add_off_army(army_off5)
+    teste.add_off_army(army_off5)
 
     teste.add_def_army(army_def)
     teste.add_def_army(army_def2)
     teste.add_def_army(army_def3)
     teste.add_def_army(army_def4)
 
-    for i in range(0, 100):
+    for i in range(0, 2000):
         var = teste.battle_going()
         print(
             f"\nVida do exército atacante: {teste.get_off_actual_health(
-            )}\nVida do exército defensor: {teste.get_def_actual_health()}\n"
+            )}\nVida do exército defensor: {teste.get_def_actual_health()}"
         )
         if var is True:
             break

@@ -18,6 +18,9 @@ class Province:
         self.level_defence_modifiers = {
             1: 1.0, 2: 1.1, 3: 1.3, 4: 1.5, 5: 1.9}
 
+        self.level_attack_modifiers = {
+            1: 1.0, 2: 1.1, 3: 1.3, 4: 1.5, 5: 1.9}
+
     def upgrade(self):
         if self.level < self.level_cap:
             if self.dom_turns == 0:

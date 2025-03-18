@@ -16,7 +16,7 @@ class Battle:
         self.loser = None
         self.last_off_damage = 0
         self.last_def_damage = 0
-        self.diff_health_multiplier = 0.25
+        self.diff_health_multiplier = 0.15
         self.damage_multiplier = 1.1
 
     def create_off_army(self):
@@ -156,19 +156,19 @@ class Battle:
 
     def dice_roll(self, values: list = [1, 2, 3, 4, 5, 6]) -> float:
         multiplier = {
-            1: 0.2,
-            2: 0.5,
-            3: 0.8,
+            1: 0.5,
+            2: 0.8,
+            3: 0.9,
             4: 1.0,
             5: 1.1,
             6: 1.5
         }
         roll = random.choice(values)
-        print(f"Dado rolado: {roll}")
         return multiplier.get(roll, 1.0)
 
     def __calculate_offensive_off_damage(self, off_attack_stats: float) -> float:
-        return (off_attack_stats * (self.off_diff_health() * self.diff_health_multiplier)) * random.uniform(0.8, 1.6)
+        # Adicionar ao cálculo o bônus de ataque baseado no nível da província de origem
+        return (off_attack_stats * (self.off_diff_health() * self.diff_health_multiplier))
 
     def __calculate_offensive_def_damage(self, def_defense_stats):
         return (
@@ -176,8 +176,13 @@ class Battle:
             * self.province.get_terrain().get_defence_modifier()
             * self.province.get_defence_modifier()
             * (self.def_diff_health() * self.diff_health_multiplier)
-            * self.dice_roll()
         )
+
+    def __calculate_defensive_off_damage(self, off_attack_stats):
+        return (off_attack_stats * (self.off_diff_health() * self.diff_health_multiplier))
+
+    def __calculate_defensive_def_damage(self, def_defense_stats):
+        return (def_defense_stats * (self.def_diff_health() * self.diff_health_multiplier))
 
     def off_damage(self, off_attack_stats: float, def_defense_stats: float):
         off_damage = round(
@@ -186,99 +191,38 @@ class Battle:
              * self.damage_multiplier) * self.dice_roll(),
             2,
         )
-
-        print(
-            f"Dano total do exército atacante: {str(off_damage)}")
-        print(
-            f"Valor base do exército atacante: {self.__calculate_offensive_off_damage(off_attack_stats)}"
-        )
-        print(
-            f"Valor total do exército defensor: {self.__calculate_offensive_def_damage(def_defense_stats)}"
-        )
-
         return off_damage if off_damage > 0 else 0.1
 
     def def_damage(self, def_attack_stats, off_defense_stats):
         def_damage = round(
-            (
-                (
-                    (
-                        (
-                            def_attack_stats
-                            * (self.def_diff_health() * self.diff_health_multiplier)
-                        )
-                    )
-                    * self.dice_roll()
-                )
-                - (
-                    (
-                        off_defense_stats
-                        * (self.off_diff_health() * self.diff_health_multiplier)
-                        * self.dice_roll()
-                    )
-                )
-            )
-            * self.damage_multiplier,
+            ((self.__calculate_defensive_off_damage(def_attack_stats) -
+             self.__calculate_defensive_def_damage(off_defense_stats))
+             * self.damage_multiplier) * self.dice_roll(),
             2,
         )
         return def_damage if def_damage > 0 else 0.1
 
     def health_check(self):
-        redo = False
         for army in self.off_army:
-            if isinstance(army, Army_Group):
-                if len(army.armys) == 0:
-                    self.remove_off_army(army)
-                    return self.army_check()
-                else:
-                    for ar in army.armys:
-                        if ar.get_health() <= 0:
-                            army.remove_army(ar)
-                            redo = True
-            else:
-                if army.get_health() <= 0:
-                    self.remove_off_army(army)
-                    return self.army_check()
-
+            if army.check_health():
+                self.remove_off_army(army)
         for army in self.def_army:
-            if isinstance(army, Army_Group):
-                if len(army.armys) == 0:
-                    self.remove_def_army(army)
-                    return self.army_check()
-                else:
-                    for ar in army.armys:
-                        if ar.get_health() <= 0:
-                            army.remove_army(ar)
-                            redo = True
-            else:
-                if army.get_health() <= 0:
-                    self.remove_def_army(army)
-                    return self.army_check()
-        if redo:
-            self.health_check()
+            if army.check_health():
+                self.remove_def_army(army)
 
         return self.army_check()
 
     def army_check(self):
-        if self.total_off_army() == 0:
-            self.winner = self.def_army_owner
-            for army in self.def_army:
-                army.set_in_battle(False)
-            self.loser = self.off_army_owner
-            print("Exército atacante derrotado!")
+        if self.get_off_actual_health() <= 0:
             return True
-        elif self.total_def_army() == 0:
-            self.winner = self.off_army_owner
-            for army in self.off_army:
-                army.set_in_battle(False)
-            self.loser = self.def_army_owner
-            print("Exército defensor derrotado!")
+        if self.get_def_actual_health() <= 0:
             return True
         return False
 
     def battle_going(self):
         check = self.health_check()
         if check:
+            print("Batalha finalizada!")
             return True
 
         self.turn_update()
@@ -350,9 +294,9 @@ if __name__ == "__main__":
 
     for i in range(0, 2000):
         var = teste.battle_going()
+        if var is True:
+            break
         print(
             f"\nVida do exército atacante: {teste.get_off_actual_health(
             )}\nVida do exército defensor: {teste.get_def_actual_health()}"
         )
-        if var is True:
-            break

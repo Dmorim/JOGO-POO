@@ -122,6 +122,11 @@ class Army:
         self.dest_province = None
         self.turns_to_move = None
 
+    def check_health(self):
+        if self.get_health() <= 0:
+            return True
+        return False
+
     def army_is_availble(self) -> bool:
         return not self.in_move and not self.in_battle and not self.in_healing
 
@@ -194,3 +199,9 @@ class Army_Group(Army):
 
     def army_situation(self):
         return f'Grupo com: {self.get_army_quant()} exércitos. Ataque: {self.get_attack()}, Defesa: {self.get_defense()}, Saúde: {self.get_health()}. Província: {self.get_province().get_name()} {"(Em Cura)" if self.get_in_healing() else "" or "(Em Movimento)" if self.get_in_move() else ""}'
+
+    def check_health(self):
+        for army in self.armys:
+            if army.get_health() <= 0:
+                self.remove_army(army)
+        return super().check_health()

@@ -19,7 +19,7 @@ class Province:
             1: 1.0, 2: 1.2, 3: 1.4, 4: 1.7, 5: 1.9}
 
         self.level_attack_modifiers = {
-            1: 1.2, 2: 1.3, 3: 1.4, 4: 1.5, 5: 1.7}
+            1: 1.2, 2: 1.3, 3: 1.35, 4: 1.4, 5: 1.6}
 
     def upgrade(self):
         if self.level < self.level_cap:
@@ -71,6 +71,9 @@ class Province:
 
     def get_defence_modifier(self):
         return self.level_defence_modifiers[self.level]
+
+    def get_attack_modifier(self):
+        return self.level_attack_modifiers[self.level]
 
     def set_current_owner(self, new_owner):
         self.current_owner = new_owner

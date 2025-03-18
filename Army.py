@@ -7,6 +7,8 @@ class Army:
         self.defense = round(defense * (random.uniform(0.80, 1.2)), 2)
         self.health = 10
         self.max_health = 10
+        self.birth_province = current_province
+        self.birth_modifier = current_province.get_attack_modifier()
         self.current_province = current_province
         self.owner = owner
         self.move_points = 5
@@ -129,6 +131,12 @@ class Army:
 
     def army_is_availble(self) -> bool:
         return not self.in_move and not self.in_battle and not self.in_healing
+
+    def get_birth_province(self):
+        return self.birth_province
+    
+    def get_birth_modifier(self):
+        return self.birth_modifier
 
 
 class Army_Group(Army):

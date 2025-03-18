@@ -159,3 +159,8 @@ class Player:
 
     def get_army_in_battle(self):
         return [army for army in self.armys if army.get_in_battle()]
+
+    def debugg_clear_provinces(self):
+        if len(self.provinces) > 0:
+            for province in self.provinces:
+                self.remove_province(province)

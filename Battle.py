@@ -1,4 +1,6 @@
 import random
+from math import sqrt, log
+
 from Army import Army, Army_Group
 from Province import Province
 
@@ -16,8 +18,8 @@ class Battle:
         self.loser = None
         self.last_off_damage = 0
         self.last_def_damage = 0
-        self.diff_health_multiplier = 0.15
-        self.damage_multiplier = 1.1
+        self.damage_multiplier = 1
+        self.offensive_defensive_debuff = 1
 
     def create_off_army(self):
         for army in self.off_army_owner.get_armys():
@@ -52,6 +54,7 @@ class Battle:
 
     def finish_battle(self):
         self.__remove_army_from_battle()
+        self.__set_winner_loser()
         self.__update_provinces_after_battle()
 
     def __remove_army_from_battle(self):
@@ -62,13 +65,22 @@ class Battle:
             army.set_in_battle(False)
             self.def_army.remove(army)
 
+    def __set_winner_loser(self):
+        if self.get_off_actual_health() > self.get_def_actual_health():
+            self.winner = self.off_army_owner
+            self.loser = self.def_army_owner
+        else:
+            self.winner = self.def_army_owner
+            self.loser = self.off_army_owner
+
     def __update_provinces_after_battle(self):
-        self.province.set_current_owner(self.winner)
-        self.province.set_dom_turns(3)
-        self.province.reset_turns_under_control()
-        self.province.set_in_battle(False)
-        self.loser.remove_province(self.province)
-        self.winner.add_province(self.province)
+        if self.winner == self.off_army_owner:
+            self.province.set_current_owner(self.winner)
+            self.province.set_dom_turns(3)
+            self.province.reset_turns_under_control()
+            self.province.set_in_battle(False)
+            self.loser.remove_province(self.province)
+            self.winner.add_province(self.province)
 
     def get_off_total_health(self):
         return sum([army.get_max_health() for army in self.off_army])
@@ -95,10 +107,10 @@ class Battle:
         return round(sum([army.get_defense() for army in self.def_army]), 2)
 
     def off_diff_health(self):
-        return round(self.get_off_actual_health() / self.get_off_total_health(), 2)
+        return round(sqrt(self.get_off_actual_health() / self.get_off_total_health()), 2)
 
     def def_diff_health(self):
-        return round(self.get_def_actual_health() / self.get_def_total_health(), 2)
+        return round(sqrt(self.get_def_actual_health() / self.get_def_total_health()), 2)
 
     def get_province(self):
         return self.province
@@ -166,38 +178,60 @@ class Battle:
         roll = random.choice(values)
         return multiplier.get(roll, 1.0)
 
+    def __off_diff_quant(self) -> float:
+        quant_diff = self.total_off_army() / self.total_def_army()
+        quant_modifier = (0.05 * quant_diff) + 0.70
+        return quant_modifier if quant_modifier < 1 and quant_modifier > 0 else 1
+
+    def __def_diff_quant(self) -> float:
+        quant_diff = self.total_def_army() / self.total_off_army()
+        quant_modifier = (0.05 * quant_diff) + 0.70
+        return quant_modifier if quant_modifier < 1 and quant_modifier > 0 else 1
+
+    def __return_adapted_off_army_stats(self):
+        army_stats = sum(
+            army.get_attack() * army.get_birth_modifier()
+            for army in self.off_army
+        )
+        return round(army_stats, 2)
+
+    def __return_adapted_def_army_stats(self):
+        army_stats = sum(
+            army.get_defense() * army.get_birth_modifier()
+            for army in self.def_army
+        )
+        return round(army_stats, 2)
+
     def __calculate_offensive_off_damage(self, off_attack_stats: float) -> float:
         # Adicionar ao cálculo o bônus de ataque baseado no nível da província de origem
-        return (off_attack_stats * (self.off_diff_health() * self.diff_health_multiplier))
+        return off_attack_stats * self.off_diff_health()
 
     def __calculate_offensive_def_damage(self, def_defense_stats):
         return (
             def_defense_stats
             * self.province.get_terrain().get_defence_modifier()
             * self.province.get_defence_modifier()
-            * (self.def_diff_health() * self.diff_health_multiplier)
+            * self.def_diff_health()
         )
 
-    def __calculate_defensive_off_damage(self, off_attack_stats):
-        return (off_attack_stats * (self.off_diff_health() * self.diff_health_multiplier))
+    def __calculate_defensive_off_damage(self, def_attack_stats):
+        return def_attack_stats * self.def_diff_health()
 
-    def __calculate_defensive_def_damage(self, def_defense_stats):
-        return (def_defense_stats * (self.def_diff_health() * self.diff_health_multiplier))
+    def __calculate_defensive_def_damage(self, off_defense_stats):
+        return off_defense_stats * self.off_diff_health()
 
     def off_damage(self, off_attack_stats: float, def_defense_stats: float):
         off_damage = round(
             ((self.__calculate_offensive_off_damage(off_attack_stats) -
-             self.__calculate_offensive_def_damage(def_defense_stats))
-             * self.damage_multiplier) * self.dice_roll(),
+             self.__calculate_offensive_def_damage(def_defense_stats)) * self.__off_diff_quant) * self.dice_roll(),
             2,
         )
         return off_damage if off_damage > 0 else 0.1
 
     def def_damage(self, def_attack_stats, off_defense_stats):
         def_damage = round(
-            ((self.__calculate_defensive_off_damage(def_attack_stats) -
-             self.__calculate_defensive_def_damage(off_defense_stats))
-             * self.damage_multiplier) * self.dice_roll(),
+            (self.__calculate_defensive_off_damage(def_attack_stats) -
+             self.__calculate_defensive_def_damage(off_defense_stats) * self.__def_diff_quant) * self.dice_roll(),
             2,
         )
         return def_damage if def_damage > 0 else 0.1
@@ -228,16 +262,16 @@ class Battle:
         self.turn_update()
 
         off_damage = self.off_damage(
-            self.get_off_total_attack(), self.get_def_total_defense()
+            self.__return_adapted_off_army_stats(), self.get_def_total_defense()
         )
         def_damage = self.def_damage(
-            self.get_def_total_attack(), self.get_off_total_defense()
+            self.__return_adapted_def_army_stats(), self.get_off_total_defense()
         )
 
         if self.get_turns_count() == self.get_epic_turns():
             print("Batalha épica!")
-            off_damage *= random.uniform(1.3, 2.8)
-            def_damage *= random.uniform(1.3, 2.8)
+            off_damage *= 3
+            def_damage *= 3
             off_damage = round(off_damage, 2)
             def_damage = round(def_damage, 2)
 

@@ -71,34 +71,3 @@ class BattleControl:
             return self.__army_into_battle(province, army)
 
         self.__create_battle(province, army)
-
-    def remove_army_from_battle(self, province, army):
-        """
-        Remove um exército de uma batalha em andamento na província especificada.
-
-        Args:
-            province (Province): A província onde a batalha está ocorrendo.
-            army (Army): O exército que está sendo removido da batalha.
-
-        Returns:
-            None
-        """
-        battle = self.get_ongoing_battle(province)
-        if battle is None:
-            raise ValueError(
-                "Nenhuma batalha em andamento na província especificada")
-
-        owner = self.__return_battle_owner(province, army)
-
-        if owner == battle.get_off_army_owner():
-            if army in battle.get_off_army():
-                battle.remove_off_army(army)
-            else:
-                raise ValueError(
-                    "O exército não está na lista de exércitos atacantes")
-        else:
-            if army in battle.get_def_army():
-                battle.remove_def_army(army)
-            else:
-                raise ValueError(
-                    "O exército não está na lista de exércitos defensores")

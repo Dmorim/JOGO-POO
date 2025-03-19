@@ -97,13 +97,13 @@ class Battle:
     def get_off_total_attack(self):
         return round(sum([army.get_attack() for army in self.off_army]), 2)
 
-    def get_off_total_defense(self):
+    def get_off_total_defense(self) -> float:
         return round(sum([army.get_defense() for army in self.off_army]), 2)
 
     def get_def_total_attack(self):
         return round(sum([army.get_attack() for army in self.def_army]), 2)
 
-    def get_def_total_defense(self):
+    def get_def_total_defense(self) -> float:
         return round(sum([army.get_defense() for army in self.def_army]), 2)
 
     def off_diff_health(self):
@@ -178,24 +178,14 @@ class Battle:
         roll = random.choice(values)
         return multiplier.get(roll, 1.0)
 
-    def __off_diff_quant(self) -> float:
-        quant_diff = self.total_off_army() / self.total_def_army()
-        quant_modifier = (0.05 * quant_diff) + 0.70
-        return quant_modifier if quant_modifier < 1 and quant_modifier > 0 else 1
-
-    def __def_diff_quant(self) -> float:
-        quant_diff = self.total_def_army() / self.total_off_army()
-        quant_modifier = (0.05 * quant_diff) + 0.70
-        return quant_modifier if quant_modifier < 1 and quant_modifier > 0 else 1
-
-    def __return_adapted_off_army_stats(self):
+    def __return_adapted_off_army_stats(self) -> float:
         army_stats = sum(
             army.get_attack() * army.get_birth_modifier()
             for army in self.off_army
         )
         return round(army_stats, 2)
 
-    def __return_adapted_def_army_stats(self):
+    def __return_adapted_def_army_stats(self) -> float:
         army_stats = sum(
             army.get_defense() * army.get_birth_modifier()
             for army in self.def_army
@@ -222,18 +212,19 @@ class Battle:
 
     def off_damage(self, off_attack_stats: float, def_defense_stats: float):
         off_damage = round(
-            ((self.__calculate_offensive_off_damage(off_attack_stats) -
-             self.__calculate_offensive_def_damage(def_defense_stats)) * self.__off_diff_quant) * self.dice_roll(),
+            (self.__calculate_offensive_off_damage(off_attack_stats) -
+             self.__calculate_offensive_def_damage(def_defense_stats)) * self.dice_roll(),
             2,
         )
         return off_damage if off_damage > 0 else 0.1
 
     def def_damage(self, def_attack_stats, off_defense_stats):
-        def_damage = round(
-            (self.__calculate_defensive_off_damage(def_attack_stats) -
-             self.__calculate_defensive_def_damage(off_defense_stats) * self.__def_diff_quant) * self.dice_roll(),
-            2,
-        )
+        def_damage = round((
+                           self.__calculate_defensive_off_damage(def_attack_stats) -
+                           self.__calculate_defensive_def_damage(
+                               off_defense_stats)) * self.dice_roll(),
+                           2,
+                           )
         return def_damage if def_damage > 0 else 0.1
 
     def health_check(self):

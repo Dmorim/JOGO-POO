@@ -38,7 +38,7 @@ class TestBattleSimulation(unittest.TestCase):
             self.defensor.add_province(prov_defensor)
 
             army_off = [Army(prov_atacante, self.atacante) for _ in range(10)]
-            army_def = [Army(prov_defensor, self.defensor) for _ in range(10)]
+            army_def = [Army(prov_defensor, self.defensor) for _ in range(8)]
 
             battle = Battle(self.atacante, self.defensor, prov_defensor)
             for army in army_off:
@@ -47,8 +47,12 @@ class TestBattleSimulation(unittest.TestCase):
                 battle.add_def_army(army)
 
             while not battle.battle_going():
-                pass
-
+                if battle.get_turns_count() == 2:
+                    for _ in range(3):
+                        battle.add_off_army(Army(prov_atacante, self.atacante))
+                if battle.get_turns_count() == 5:
+                    for _ in range(8):
+                        battle.add_def_army(Army(prov_defensor, self.defensor))
             battle.finish_battle()
 
             if battle.get_winner() == self.atacante:

@@ -5,7 +5,7 @@ from Game.Turn_Checks.Checks_Execution.Province_Checks import ProvinceChecks
 from Game.Turn_Checks.Checks_Execution.Army_Health_Check import ArmyHealthChecker
 from Game.Turn_Checks.Checks_Execution.Army_Battle_Updater import BattleUpdater
 from Game.Turn_Checks.Checks_Execution.Army_Battle_Finisher import BattleFinisher
-from Game.Battle_Control import Battle_Control
+from Game.Battle_Control.Battle_Control import BattleControl
 
 
 from Game.Turn_Checks.Army_Checks import ArmyChecks
@@ -14,7 +14,7 @@ from Game.Turn_Checks.Battle_Checks import BattleChecks
 
 class GameTurnChecks:
     def __init__(self):
-        self.battle_control = Battle_Control()
+        self.battle_control = BattleControl()
 
         self.army_move_checks = ArmyMoveChecks()
         self.army_group_checks = ArmyGroupCheck()

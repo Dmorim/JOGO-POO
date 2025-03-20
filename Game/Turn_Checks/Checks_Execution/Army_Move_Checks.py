@@ -1,10 +1,10 @@
 from Player import Player
-from Game.Battle_Control import Battle_Control
+from Game.Battle_Control.Battle_Control import BattleControl
 
 
 class ArmyMoveChecks:
     def __init__(self):
-        self.battle_control = Battle_Control()
+        self.battle_control = BattleControl()
 
     def __update_movement_turns(self, player):
         for army in player.get_army_in_move():

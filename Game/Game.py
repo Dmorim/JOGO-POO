@@ -1,5 +1,6 @@
 from Army import Army_Group
 from Game.Actions.Player_Actions import Player_Action
+from Game.Turn_Checks.Game_Turn_Check import GameTurnChecks
 from Game.Game_State import Game_State
 
 
@@ -11,6 +12,7 @@ class Game:
         self.ongoing_battles = []
         self.finished_battles = []
         self.state = Game_State()
+        self.checks = GameTurnChecks()
 
     def add_player(self, player):
         self.players.append(player)
@@ -50,8 +52,8 @@ class Game:
                 self.current_player = player
                 self.current_player.actions += 3
                 self.state.mapmode = True
-                self.army_move_points()
                 self.actions = Player_Action()
+                self.checks.begin_of_turns_checks(self.current_player)
 
                 while self.turn_pass():
                     if self.state.mapmode:
@@ -61,10 +63,7 @@ class Game:
 
                 # Update game state
 
-                self.moviment.update_movement_turns(self.current_player)
-                self.update_battles()
-                for province in self.current_player.get_player_province():
-                    province.increment_turns_under_control()
+            self.checks.end_of_turns_checks(self.current_player)
             self.next_turn()
 
     def print_map(self):

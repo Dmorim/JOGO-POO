@@ -1,8 +1,10 @@
 from Battle import Battle
+from Game.Battle_Control.Battle_Control import BattleControl
+from Game.Turn_Checks.Checks_Execution.Army_Battle_Finisher import BattleFinisher
 
 
 class BattleUpdater:
-    def __init__(self, battle_control, battle_finisher):
+    def __init__(self, battle_control: BattleControl, battle_finisher: BattleFinisher):
         self.battle_control = battle_control
         self.battle_finisher = battle_finisher
 
@@ -14,7 +16,7 @@ class BattleUpdater:
         return battle.battle_going()
 
     def update_battles(self, player):
-        for battle in self.battle_control.get_ongoing_battles():
+        for battle in self.battle_control.ongoing_battles.values():
             update_battle = self.check_owner_battle_update(battle, player)
             if update_battle is True:
                 self.battle_control.finish_battle(battle.get_province())

@@ -112,6 +112,12 @@ class Battle:
     def def_diff_health(self):
         return round(sqrt(self.get_def_actual_health() / self.get_def_total_health()), 2)
 
+    def battle_situation(self):
+        battle_situation = f'Batalha em {self.province.get_name()} entre {self.off_army_owner.get_player_name()} e {self.def_army_owner.get_player_name()}'
+        attack_situation = f'Exército atacante: Quantidade: {self.total_off_army()}, Ataque: {self.get_off_total_attack()}, Defesa: {self.get_off_total_defense()}, Vida: {round(self.get_off_actual_health(), 2)}'
+        defense_situation = f'Exército defensor: Quantidade: {self.total_def_army()}, Ataque: {self.get_def_total_attack()}, Defesa: {self.get_def_total_defense()}, Vida: {round(self.get_def_actual_health(), 2)}'
+        return f"{battle_situation}\n{attack_situation}\n{defense_situation}"
+
     def get_province(self):
         return self.province
 

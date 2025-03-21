@@ -164,3 +164,6 @@ class Player:
         if len(self.provinces) > 0:
             for province in self.provinces:
                 self.remove_province(province)
+
+    def army_in_province(self, province):
+        return [army for army in self.armys if army.get_province() == province]

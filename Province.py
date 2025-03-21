@@ -109,3 +109,6 @@ class Province:
 
     def get_available_armys(self) -> list:
         return [army for army in self.current_owner.get_armys_in_province(self) if army.army_is_availble()]
+
+    def province_situation(self):
+        return f"Província: {self.name}, Terreno: {self.terrain_type.get_terrain_name()}. (Nível: {self.level}) Vizinhos: {', '.join(neighbor.get_name() for neighbor in self.neighbor_provinces)}"

@@ -167,3 +167,10 @@ class Player:
 
     def army_in_province(self, province):
         return [army for army in self.armys if army.get_province() == province]
+
+    def get_total_armys(self):
+        total = 0
+        if len(self.armys) > 0:
+            for army in self.armys:
+                total += army.get_army_quant()
+        return total

@@ -37,11 +37,32 @@ class GameMap:
 
     def print_map(self):
         # Create a table for the turn and map information
-        title_style = Style(color="black",
+        title_style = Style(color="bright_white",
                             bgcolor="dark_blue", bold=True, italic=True)
-        self.console.print(Panel.fit("IMPÉRIO DE " + self.game.current_player.get_player_name().upper(),
-                                     stylep=title_style))
+        self.console.print(Panel.fit(f"JOGADOR: {self.game.current_player.get_player_name().upper()}\nTurno: {self.game.get_turn_count()}",
+                                     style=title_style))
 
+        general_map = Table.grid(padding=(0, 1), expand=True)
+
+        for player in self.game.players:
+            color_of_player = "green" if player == self.game.current_player else "red"
+            general_map.add_row(Panel.fit(
+                f"Jogador: {player.get_player_name()} | Total de Exércitos: {player.get_total_armys()}", style=color_of_player, border_style=color_of_player))
+
+            provinces_table = Table.grid(padding=(0, 0))
+            for provinces in player.get_player_province():
+                provinces_table.add_row(
+                    Panel.fit(provinces.province_situation(), border_style=color_of_player, style=color_of_player, padding=(0, 1)))
+
+                army_table = Table.grid(padding=(0, 1))
+                for army in player.army_in_province(provinces):
+                    army_table.add_row(
+                        Panel.fit(army.army_situation(), style='bright_blue'))
+                provinces_table.add_row(army_table)
+            general_map.add_row(provinces_table)
+        self.console.print(general_map)
+
+        """
         # Print the map with province ownership and armies
         for player in self.game.players:
             self.console.print(
@@ -50,3 +71,4 @@ class GameMap:
             self.console.print()
         if self.battle_control.ongoing_battles:
             self.__print_player_battle(player)
+        """

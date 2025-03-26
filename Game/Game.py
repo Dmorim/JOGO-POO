@@ -1,4 +1,4 @@
-from Army import Army_Group
+from Game.Game_Map import GameMap
 from Game.Actions.Player_Actions import Player_Action
 from Game.Turn_Checks.Game_Turn_Check import GameTurnChecks
 from Game.Game_State import Game_State
@@ -11,6 +11,7 @@ class Game:
         self.turn_count = 0
         self.ongoing_battles = []
         self.finished_battles = []
+        self.map = GameMap(self)
         self.state = Game_State()
         self.checks = GameTurnChecks()
         self.actions = Player_Action()
@@ -57,7 +58,7 @@ class Game:
 
                 while self.turn_pass():
                     if self.state.mapmode:
-                        self.print_map()
+                        self.map.print_map()
                     self.actions.action(
                         self.current_player.get_ia(), self.state.mapmode)
 

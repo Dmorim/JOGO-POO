@@ -39,6 +39,12 @@ class GameMap:
         # Create a table for the turn and map information
         title_style = Style(color="bright_white",
                             bgcolor="dark_blue", bold=True, italic=True)
+
+        provinces_style_player = Style(
+            color="green")
+        provinces_style_enemy = Style(
+            color="red")
+
         self.console.print(Panel.fit(f"JOGADOR: {self.game.current_player.get_player_name().upper()}\nTurno: {self.game.get_turn_count()}",
                                      style=title_style))
 
@@ -49,17 +55,20 @@ class GameMap:
             general_map.add_row(Panel.fit(
                 f"Jogador: {player.get_player_name()} | Total de Exércitos: {player.get_total_armys()}", style=color_of_player, border_style=color_of_player))
 
-            provinces_table = Table.grid(padding=(0, 1), expand=True)
+            provinces_table = Table.grid()
             for provinces in player.get_player_province():
                 provinces_table.add_row(
-                    Panel.fit(provinces.province_situation(), border_style=color_of_player, style=color_of_player, padding=(0, 1)))
+                    Panel.fit(provinces.province_situation(), border_style=color_of_player, style=color_of_player))
 
-                army_table = Table.grid(padding=(0, 1))
-                for army in player.army_in_province(provinces):
-                    army_table.add_row(
-                        Panel.fit(army.army_situation(), style='bright_blue'))
-                provinces_table.add_row(army_table)
-            general_map.add_row(provinces_table)
+                if len(player.army_in_province(provinces)) > 0:
+                    army_table = Table.grid()
+                    for army in player.army_in_province(provinces):
+                        army_table.add_row(
+                            Panel.fit(army.army_situation(), style='bright_blue'))
+                    provinces_table.add_row(army_table)
+            panel_provinces = Panel.fit(
+                provinces_table, style=provinces_style_player if player == self.game.current_player else provinces_style_enemy)
+            general_map.add_row(panel_provinces)
         self.console.print(general_map)
 
         """

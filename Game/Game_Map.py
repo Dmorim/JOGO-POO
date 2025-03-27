@@ -49,7 +49,7 @@ class GameMap:
             general_map.add_row(Panel.fit(
                 f"Jogador: {player.get_player_name()} | Total de Exércitos: {player.get_total_armys()}", style=color_of_player, border_style=color_of_player))
 
-            provinces_table = Table.grid(padding=(0, 0))
+            provinces_table = Table.grid(padding=(0, 1), expand=True)
             for provinces in player.get_player_province():
                 provinces_table.add_row(
                     Panel.fit(provinces.province_situation(), border_style=color_of_player, style=color_of_player, padding=(0, 1)))

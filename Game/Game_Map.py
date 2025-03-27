@@ -36,41 +36,69 @@ class GameMap:
                 self.console.print(f"{'='*78}\n")
 
     def print_map(self):
-        # Create a table for the turn and map information
+        # Estilo do título
         title_style = Style(color="bright_white",
                             bgcolor="dark_blue", bold=True, italic=True)
 
-        provinces_style_player = Style(
-            color="green")
-        provinces_style_enemy = Style(
-            color="red")
+        self.console.print(
+            Panel.fit(
+                f"JOGADOR: {self.game.current_player.get_player_name().upper() or 'Desconhecido'}\nTurno: {self.game.get_turn_count()}",
+                style=title_style
+            )
+        )
 
-        self.console.print(Panel.fit(f"JOGADOR: {self.game.current_player.get_player_name().upper()}\nTurno: {self.game.get_turn_count()}",
-                                     style=title_style))
-
-        general_map = Table.grid(padding=(0, 1), expand=True)
+        # Tabela principal
+        main_table = Table.grid(padding=(0, 1), expand=True)
 
         for player in self.game.players:
-            color_of_player = "green" if player == self.game.current_player else "red"
-            general_map.add_row(Panel.fit(
-                f"Jogador: {player.get_player_name()} | Total de Exércitos: {player.get_total_armys()}", style=color_of_player, border_style=color_of_player))
+            # Determinar estilo do jogador
+            player_color = "green" if player == self.game.current_player else "red"
+            player_style = Style(color=player_color)
 
-            provinces_table = Table.grid()
-            for provinces in player.get_player_province():
-                provinces_table.add_row(
-                    Panel.fit(provinces.province_situation(), border_style=color_of_player, style=color_of_player))
+            # Cabeçalho do jogador
+            player_name = player.get_player_name() or "Desconhecido"
+            total_armys = player.get_total_armys() or 0
+            player_header = Panel.fit(
+                f"Jogador: {player_name} | Exércitos: {total_armys}",
+                style=player_style,
+                border_style=player_color
+            )
+            main_table.add_row(player_header)
 
-                if len(player.army_in_province(provinces)) > 0:
-                    army_table = Table.grid()
-                    for army in player.army_in_province(provinces):
-                        army_table.add_row(
-                            Panel.fit(army.army_situation(), style='bright_blue'))
-                    provinces_table.add_row(army_table)
-            panel_provinces = Panel.fit(
-                provinces_table, style=provinces_style_player if player == self.game.current_player else provinces_style_enemy)
-            general_map.add_row(panel_provinces)
-        self.console.print(general_map)
+            # Container de províncias
+            provinces_container = Table.grid(padding=0, pad_edge=False)
 
+            for province in player.get_player_province():
+                province_situation = province.province_situation() or "Sem informações"
+                print(province_situation)
+                province_panel = Panel(
+                    province_situation,
+                    border_style=player_color,
+                    style=player_style,
+                    padding=(0, 1),
+                    expand=False
+                )
+                provinces_container.add_row(province_panel)
+                self.console.print(province_panel)
+
+                # Exércitos na província
+                armies = player.army_in_province(province) or []
+                for army in armies:
+                    army_situation = army.army_situation() or "Sem informações"
+                    print(army_situation)
+                    army_panel = Panel(
+                        army_situation,
+                        style="bright_blue",
+                        padding=(0, 2),
+                        border_style=None,
+                        expand=False
+                    )
+                    provinces_container.add_row(army_panel)
+
+            main_table.add_row(provinces_container)
+            main_table.add_row("")  # Espaçamento entre jogadores
+
+        self.console.print(main_table)
         """
         # Print the map with province ownership and armies
         for player in self.game.players:

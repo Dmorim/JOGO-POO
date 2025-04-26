@@ -3,6 +3,8 @@ from Game.Actions.Player_Actions import Player_Action
 from Game.Turn_Checks.Game_Turn_Check import GameTurnChecks
 from Game.Game_State import Game_State
 
+from Player import Player
+
 
 class Game:
     def __init__(self):
@@ -35,7 +37,7 @@ class Game:
             if len(player.get_player_province()) == 0:
                 return True
         return False
-
+    
     def next_turn(self):
         # Switch to the next player
         current_index = self.players.index(self.current_player)

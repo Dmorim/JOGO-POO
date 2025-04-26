@@ -68,9 +68,8 @@ class GameMap:
 
             for province in player.get_player_province():
                 province_situation = province.province_situation() or "Sem informações"
-                is_battling = province.get_in_battle() if hasattr(
-                    province, "get_in_battle") else False
-                dom_turns = province.get_dom_turns() if hasattr(province, "get_dom_turns") else 0
+                is_battling = province.get_in_battle()
+                dom_turns = province.get_dom_turns()
 
                 province_style = player_style
                 province_border = player_color
@@ -96,7 +95,7 @@ class GameMap:
                 )
 
                 # Exércitos indentados como linhas simples e coloridos
-                armies = player.army_in_province(province) or []
+                armies = player.army_in_province(province)
                 for army in armies:
                     army_situation = army.army_situation() or "Sem informações"
                     is_army_battling = army.get_in_battle()
@@ -123,3 +122,4 @@ class GameMap:
             )
 
         self.console.print(main_table)
+        self.__print_player_battle(self.game.current_player)

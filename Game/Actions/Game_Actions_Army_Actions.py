@@ -110,7 +110,7 @@ class ArmyActions:
         if selected_army_index == 0:
             self.game_state.mapmode = False
             return False
-        selected_army = player.armys[selected_army_index - 1]
+        selected_army = player.no_battle_armies()[selected_army_index - 1]
         print(self.__show_neighbors(selected_army))
 
         print(

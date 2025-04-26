@@ -138,7 +138,14 @@ class Main:
 
         add_neighbors()
         player1.army_creation(player1.provinces[0])
+        player1.army_creation(player1.provinces[0])
+        player1.army_creation(player1.provinces[0])
         player1.armys[0].health_damage(5)
+        player1.armys[0].set_in_battle(True)
+        player1.armys[1].set_in_healing(True)
+
+        player1.get_player_province()[0].set_dom_turns(3)
+        player1.get_player_province()[1].set_in_battle(True)
         # Start game
         game.start()
 

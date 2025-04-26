@@ -99,7 +99,7 @@ class Army:
         return 1
 
     def army_situation(self):
-        return f"Exército: Ataque: {self.get_attack()}, Defesa: {self.get_defense()}, Vida: {self.get_health()}. Província: {self.get_province().get_name()} {'(Em Cura)' if self.get_in_healing() else '' or '(Em Movimento)' if self.get_in_move() else ''}"
+        return f"Exército: Ataque: {self.get_attack()}, Defesa: {self.get_defense()}, Vida: {self.get_health()}. Província: {self.get_province().get_name()} {'(Em Cura)' if self.get_in_healing() else '' or '(Em Movimento)' if self.get_in_move() else '' or '(Em Batalha)' if self.get_in_battle() else ''}"
 
     def update_turns_to_move(self):
         if self.turns_to_move is not None or self.turns_to_move > 0:

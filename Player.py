@@ -108,7 +108,7 @@ class Player:
         self.ia = ia
 
     def no_battle_armies(self):
-        return [army for army in self.armys if not army.get_province().get_in_battle()]
+        return [army for army in self.armys if not army.get_in_battle()]
 
     def get_army_in_move(self):
         return [army for army in self.armys if army.get_in_move()]

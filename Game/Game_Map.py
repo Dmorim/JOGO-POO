@@ -36,17 +36,22 @@ class GameMap:
             if self.battle_control.ongoing_battles.index(battle) != len(self.battle_control.ongoing_battles) - 1:
                 self.console.print(f"{'='*78}\n")
 
+    def __print_current_player(self, title_style, player):
+        self.console.print(
+            Panel.fit(
+                f"JOGADOR: {player.get_player_name().upper()}\nTurno: {self.game.get_turn_count()}",
+                style=title_style
+            )
+        )
+
+    def __print_player_table(self, player, player_style):
+
     def print_map(self):
         # Estilo do título
         title_style = Style(color="bright_white",
                             bgcolor="dark_blue", bold=True, italic=True)
 
-        self.console.print(
-            Panel.fit(
-                f"JOGADOR: {self.game.current_player.get_player_name().upper() if self.game.current_player.get_player_name() else 'Desconhecido'}\nTurno: {self.game.get_turn_count()}",
-                style=title_style
-            )
-        )
+        self.__print_current_player(title_style, self.game.current_player)
 
         # Tabela principal
         main_table = Table.grid(padding=(1, 2), expand=True)
@@ -58,10 +63,6 @@ class GameMap:
             player_style = Style(color=player_color)
 
             # Nome e total de exércitos do jogador como título estilizado
-            player_name = player.get_player_name() or "Desconhecido"
-            total_armys = player.get_total_armys() or 0
-            player_title_text = Text(f"Jogador: {player_name} | Exércitos: {total_armys}", style=Style(
-                bold=True, color=player_color))
 
             # Container de províncias do jogador
             player_container = Table.grid(padding=(0, 0))

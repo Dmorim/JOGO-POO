@@ -12,15 +12,21 @@ class GameMap:
         self.battle_control = BattleControl()
         self.console = Console()
 
-    def __print_player_province(self, player):
-        for province in player.get_player_province():
-            self.console.print(
-                province.province_situation(), style="bold green")
-            self.__print_player_army(player, province)
+    def __province_color_status(self, province, player_style):
+        if province.get_in_battle():
+            return Style(color="red", bold=True)
+        elif province.get_dom_turns() > 0:
+            return Style(color="yellow", bold=True)
+        else:
+            return player_style
 
-    def __print_player_army(self, player, province):
-        for army in player.army_in_province(province):
-            self.console.print(army.army_situation(), style="bold blue")
+    def __army_color_status(self, army):
+        if army.get_in_battle():
+            return Style(color="red", bold=True)
+        elif army.get_in_healing():
+            return Style(color="green", bold=True)
+        else:
+            return Style(color="bright_blue")
 
     def __print_player_battle(self, player):
         self.console.print(
@@ -39,17 +45,40 @@ class GameMap:
     def __print_current_player(self, title_style, player):
         self.console.print(
             Panel.fit(
-                f"JOGADOR: {player.get_player_name().upper()}\nTurno: {self.game.get_turn_count()}",
+                f"JOGADOR: {player.get_player_name().upper()} | Turno: {self.game.get_turn_count()} | Pontos: {player.get_player_actions()}",
                 style=title_style
             )
         )
 
-    def __print_player_table(self, player, player_style):
+    def __player_province_group(self, province, player_style, player_color):
+        province_situation = province.province_situation() or "Sem informações"
+
+        province_border = player_color
+        province_style = self.__province_color_status(province, player_style)
+        province_text = Text(province_situation, style=province_style)
+
+        province_group = Table.grid(padding=(0, 0))
+        province_group.add_row(
+            Panel(
+                province_text,
+                border_style=province_border,
+                style=province_style,
+                padding=(0, 1),
+                width=120
+            )
+        )
+        return province_group
+
+    def __player_province_army(self, army, province_group):
+        army_situation = army.army_situation() or "Sem informações"
+        army_style = self.__army_color_status(army)
+
+        army_text = Text(f"    {army_situation}", style=army_style)
+        province_group.add_row(army_text)
 
     def print_map(self):
         # Estilo do título
-        title_style = Style(color="bright_white",
-                            bgcolor="dark_blue", bold=True, italic=True)
+        title_style = Style(color="bright_white", bold=True, italic=True)
 
         self.__print_current_player(title_style, self.game.current_player)
 
@@ -61,59 +90,20 @@ class GameMap:
             is_current = player == self.game.current_player
             player_color = "green" if is_current else "dark_orange"
             player_style = Style(color=player_color)
-
-            # Nome e total de exércitos do jogador como título estilizado
+            player_name = player.get_player_name()
+            total_armys = player.get_total_armys()
+            player_title_text = Text(f"Jogador: {player_name} | Exércitos: {total_armys}", style=Style(
+                bold=True, color=player_color))
 
             # Container de províncias do jogador
             player_container = Table.grid(padding=(0, 0))
-
             for province in player.get_player_province():
-                province_situation = province.province_situation() or "Sem informações"
-                is_battling = province.get_in_battle()
-                dom_turns = province.get_dom_turns()
-
-                province_style = player_style
-                province_border = player_color
-                if is_battling:
-                    province_style = Style(
-                        color="red", bold=True)
-                    province_border = "red"
-                elif dom_turns > 0:
-                    province_style = Style(color="yellow", bold=True)
-                    province_border = "yellow"
-
-                province_text = Text(province_situation, style=province_style)
-
-                province_group = Table.grid(padding=(0, 0))
-                province_group.add_row(
-                    Panel(
-                        province_text,
-                        border_style=province_border,
-                        style=province_style,
-                        padding=(0, 1),
-                        width=120
-                    )
-                )
-
+                province_group = self.__player_province_group(
+                    province, player_style, player_color)
                 # Exércitos indentados como linhas simples e coloridos
                 armies = player.army_in_province(province)
                 for army in armies:
-                    army_situation = army.army_situation() or "Sem informações"
-                    is_army_battling = army.get_in_battle()
-                    is_army_healing = army.get_in_healing()
-
-                    if is_army_battling:
-                        army_style = Style(
-                            color="red", bold=True)
-                    elif is_army_healing:
-                        army_style = Style(
-                            color="bright_green")
-                    else:
-                        army_style = Style(color="bright_blue")
-
-                    army_text = Text(f"    {army_situation}", style=army_style)
-                    province_group.add_row(army_text)
-
+                    self.__player_province_army(army, province_group)
                 player_container.add_row(province_group)
 
             # Adiciona container de jogador na tabela principal com título estilizado e largura dinâmica

@@ -1,6 +1,7 @@
 from Game.Battle_Control.Battle_Control import BattleControl
+from Configs.Console import ConsoleClass
+
 from rich.table import Table
-from rich.console import Console
 from rich.panel import Panel
 from rich.style import Style
 from rich.text import Text
@@ -10,7 +11,7 @@ class GameMap:
     def __init__(self, game):
         self.game = game
         self.battle_control = BattleControl()
-        self.console = Console()
+        self.console = ConsoleClass.get_console()
 
     def __province_color_status(self, province, player_style):
         if province.get_in_battle():

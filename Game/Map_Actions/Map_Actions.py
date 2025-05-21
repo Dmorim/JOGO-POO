@@ -1,11 +1,12 @@
-from rich.console import Console
+from Configs.Console import ConsoleClass
+
 from rich.table import Table
 from rich.text import Text
 
 
 class MapActions:
     def __init__(self):
-        self.console = Console()
+        self.console = ConsoleClass.get_console()
 
     def __print_map_actions(self):
         map_text = Text("Ações do Mapa", style="bold blue")

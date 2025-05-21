@@ -24,3 +24,4 @@ class MapActions:
     def map_actions(self):
         self.console.print(self.__print_map_actions())
         self.console.print("\nEscolha uma opção: ", style="bold yellow")
+        self.console.input()

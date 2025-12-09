@@ -2,21 +2,23 @@ from Game.Game_Map import GameMap
 from Game.Actions.Player_Actions import Player_Action
 from Game.Turn_Checks.Game_Turn_Check import GameTurnChecks
 from Game.Game_State import Game_State
+from Game.Map_Actions.Map_Actions import MapActions
+from Game.Actions.Game_Actions import Game_Action
 
 from Player import Player
 
 
 class Game:
-    def __init__(self):
+    def __init__(self, Game_Map: GameMap, Game_State: Game_State, Game_Action: Game_Action, Game_Turns_Check: GameTurnChecks, Map_Action: MapActions, Player_Action: Player_Action):
         self.players = []
         self.current_player = None
         self.turn_count = 0
         self.ongoing_battles = []
         self.finished_battles = []
-        self.map = GameMap(self)
-        self.state = Game_State()
-        self.checks = GameTurnChecks()
-        self.actions = Player_Action()
+        self.game_map = Game_Map
+        self.state = Game_State
+        self.checks = Game_Turns_Check
+        self.actions = Player_Action
 
     def add_player(self, player):
         self.players.append(player)
@@ -30,6 +32,7 @@ class Game:
     def start(self):
         # Initialize game state
         self.current_player = self.players[0]
+        self.game_map.get_game(self)
 
     def end(self):
         # Check if any player has conquered all provinces
@@ -37,7 +40,7 @@ class Game:
             if len(player.get_player_province()) == 0:
                 return True
         return False
-    
+
     def next_turn(self):
         # Switch to the next player
         current_index = self.players.index(self.current_player)
@@ -60,9 +63,9 @@ class Game:
 
                 while self.turn_pass():
                     if self.state.mapmode:
-                        self.map.print_map()
+                        self.game_map.print_map()
                     self.actions.action(
-                        self.current_player.get_ia(), self.state.mapmode)
+                        self.current_player.get_ia())
 
                 # Update game state
 

@@ -12,6 +12,10 @@ class ConsoleClass:
     def __init__(self):
         self.console = None
 
+    def set_new_console(self, console: Console):
+        if self.console is None:
+            self.console = console
+
     @classmethod
     def get_console(cls):
         if cls.__ininstance is None:

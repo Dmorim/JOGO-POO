@@ -9,19 +9,32 @@ class MapActions:
         self.console = ConsoleClass.get_console()
 
     def __print_map_actions(self):
-        map_text = Text("Ações do Mapa", style="bold blue")
+        text_show = ['1. Ver Batalhas em Andamento',
+                     '2. Informações das Províncias',
+                     '3. Exibir Mapa Detalhado',
+                     '4. Histórico do Turno passado',
+                     '5. Sair']
+        map_text = Text("Ações:", style="bold blue")
         map_table = Table.grid(padding=(0, 0))
         map_table.add_row(map_text, style="bold blue")
-        map_table.add_row(
-            Text("1. Ver Batalhas em Andamento", style="bold green"),
-            Text("2. Informações das Províncias", style="bold green"),
-            Text("3. Exibir Mapa Detalhado", style="bold green"),
-            Text("4. Histórico do Turno passado", style="bold green"),
-            Text("5. Sair", style="bold green")
-        )
+        for text in text_show:
+            map_table.add_row(
+                Text(text, style="bold white"))
         return map_table
+
+    def __map_validate_option(self, option):
+        valid_options = ['1', '2', '3', '4', '5']
+        if option not in valid_options:
+            self.console.print(
+                "Opção inválida. Tente novamente.", style="bold red")
+            return False
+        return option in valid_options
 
     def map_actions(self):
         self.console.print(self.__print_map_actions())
-        self.console.print("\nEscolha uma opção: ", style="bold yellow")
-        self.console.input()
+        option = self.console.input(
+            "\nEscolha uma opção: ")
+        while not self.__map_validate_option(option):
+            option = self.console.input(
+                "\nEscolha uma opção: ")
+        return option

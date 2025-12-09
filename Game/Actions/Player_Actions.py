@@ -2,46 +2,24 @@ from Player import Player
 from IA.IA import IA
 from Game.Game_State import Game_State
 from Game.Actions.Game_Actions import Game_Action
+from Game.Map_Actions.Map_Actions import MapActions
 
 from multipledispatch import dispatch
 
 
-
-class Player_Action():
-    def __init__(self):
+class Player_Action:
+    def __init__(self, Game_State: Game_State, Game_Action: Game_Action, Map_Action: MapActions):
         self.game_state = Game_State
-        self.game_actions = Game_Action()
+        self.game_action = Game_Action
+        self.map_action = Map_Action
 
-    def __valid_acts_choices(self, valid_answers: list = ["1", "2", "0"]) -> str:
-        while True:
-            act = input("Escolha uma opção: ")
-            if act in valid_answers:
-                return act
+    @dispatch(Player)
+    def action(self, player: Player):
+        choice = self.map_action.map_actions()
+        self.game_action.action(player, choice)
 
-    def __show_valid_acts(self, player, valid_answers_text: str = "1 - Ações com Exército\n2 - Melhorar Província\n0 - Passar"):
-        print(
-            f"Ações disponíveis:\n{valid_answers_text}\nPontos de Ação: {round(player.get_player_actions(), 2)}\n{'='*25}"
-        )
-
-    def __show_initial_screen(player: Player):
-        print(
-            f"{'='*25}\nJogador Atual: {player.get_player_name()}"
-        )
-        print(
-            f"Pontos de Ação: {
-                round(player.get_player_actions(), 2)}\n"
-        )
-
-    @dispatch(Player, bool)
-    def action(self, player: Player, mapmode: bool):
-        if mapmode:
-            self.__show_initial_screen
-        self.__show_valid_acts(player)
-        action_choose = self.__valid_acts_choices()
-        self.game_actions.action(player, action_choose)
-
-    @dispatch(IA, bool)
-    def action(self, IA: IA, mapmode: bool):
+    @dispatch(IA)
+    def action(self, IA: IA):
         act, var = IA.act_do()
         if act == "Move":
             province = var[0][0]

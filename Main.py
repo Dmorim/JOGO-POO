@@ -4,6 +4,13 @@ from Province import Province
 from Game.Game import Game
 from IA.IA import IA
 
+from Game.Game_Map import GameMap
+from Game.Game_State import Game_State
+from Game.Turn_Checks.Game_Turn_Check import GameTurnChecks
+from Game.Map_Actions.Map_Actions import MapActions
+from Game.Actions.Game_Actions import Game_Action
+from Game.Actions.Player_Actions import Player_Action
+
 
 class Main:
     def __init__(self):
@@ -118,7 +125,15 @@ class Main:
             )
 
         # Create game
-        game = Game()
+        game_map = GameMap()
+        game_state = Game_State()
+        game_turns_check = GameTurnChecks()
+        map_action = MapActions()
+        game_action = Game_Action()
+        player_action = Player_Action(
+            game_state, game_action, map_action)
+        game = Game(game_map, game_state, game_action,
+                    game_turns_check, map_action, player_action)
 
         # Add players to game
         game.add_player(player1)

@@ -8,10 +8,15 @@ from rich.text import Text
 
 
 class GameMap:
-    def __init__(self, game):
-        self.game = game
+    def __init__(self):
+        self.game = None
         self.battle_control = BattleControl()
         self.console = ConsoleClass.get_console()
+
+    def get_game(self, game):
+        if self.game is None:
+            self.game = game
+        return self.game
 
     def __province_color_status(self, province, player_style):
         if province.get_in_battle():

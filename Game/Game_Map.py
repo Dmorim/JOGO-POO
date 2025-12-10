@@ -119,4 +119,4 @@ class GameMap:
             )
 
         self.console.print(main_table)
-        self.__print_player_battle(self.game.current_player)
+        # self.__print_player_battle(self.game.current_player)

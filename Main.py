@@ -10,6 +10,8 @@ from Game.Turn_Checks.Game_Turn_Check import GameTurnChecks
 from Game.Map_Actions.Map_Actions import MapActions
 from Game.Actions.Game_Actions import Game_Action
 from Game.Actions.Player_Actions import Player_Action
+from Game.Battle_Control.Battle_Control import BattleControl
+from Game.Map_Actions.Map_Battles import Map_Battles
 
 
 class Main:
@@ -135,6 +137,9 @@ class Main:
         game = Game(game_map, game_state, game_action,
                     game_turns_check, map_action, player_action)
 
+        battle_control = BattleControl()
+        map_battles = Map_Battles(battle_control)
+
         # Add players to game
         game.add_player(player1)
         game.add_player(player2)
@@ -164,6 +169,8 @@ class Main:
         # Start game
         game.start()
 
+        battle_control.handle_battle(self.viena, player1.armys[0])
+        map_battles.get_no_fog_battles()
         # Play game
         game.play()
 

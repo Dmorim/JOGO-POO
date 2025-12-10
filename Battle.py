@@ -1,5 +1,5 @@
 import random
-from math import sqrt, log
+from math import sqrt
 
 from Army import Army, Army_Group
 from Province import Province
@@ -20,6 +20,8 @@ class Battle:
         self.last_def_damage = 0
         self.damage_multiplier = 1
         self.offensive_defensive_debuff = 1
+        self.__off_damage_history = []
+        self.__def_damage_history = []
 
     def create_off_army(self):
         for army in self.off_army_owner.get_armys():
@@ -111,6 +113,14 @@ class Battle:
 
     def def_diff_health(self):
         return round(sqrt(self.get_def_actual_health() / self.get_def_total_health()), 2)
+
+    @property
+    def off_damage_history(self):
+        return self.__off_damage_history
+
+    @property
+    def def_damage_history(self):
+        return self.__def_damage_history
 
     def battle_situation(self):
         battle_situation = f'Batalha em {self.province.get_name()} entre {self.off_army_owner.get_player_name()} e {self.def_army_owner.get_player_name()}'
@@ -272,8 +282,11 @@ class Battle:
             off_damage = round(off_damage, 2)
             def_damage = round(def_damage, 2)
 
-        self.last_off_damage = f"Dano do exército atacante: {off_damage}"
-        self.last_def_damage = f"Dano do exército defensor: {def_damage}"
+        self.last_off_damage = off_damage
+        self.last_def_damage = def_damage
+
+        self.__off_damage_history.append(off_damage)
+        self.__def_damage_history.append(def_damage)
 
         off_unit_damage = off_damage / self.total_off_army()
         def_unit_damage = def_damage / self.total_def_army()

@@ -1,4 +1,5 @@
 from Battle import Battle
+from statistics import mean
 
 
 class BattleControl:
@@ -65,6 +66,26 @@ class BattleControl:
 
     def is_battle_finished(self, province):
         return province in self.finished_battles
+
+    def predict_battle_winner(self, province):
+        if not self.is_battle_ongoing(province):
+            return "Nenhuma batalha em andamento nesta província.", ""
+        battle = self.get_ongoing_battle(province)
+        off_mean = mean(
+            battle.off_damage_history) if battle.off_damage_history else 0
+        def_mean = mean(
+            battle.def_damage_history) if battle.def_damage_history else 0
+        if off_mean == def_mean:
+            return "A batalha está empatada no momento.", ""
+        winner, loser = (
+            (battle.get_off_army_owner(), battle.get_def_army_owner())
+            if off_mean > def_mean else
+            (battle.get_def_army_owner(), battle.get_off_army_owner())
+        )
+        return (
+            f'Previsão: O vencedor provável é {winner.get_player_name()}',
+            f'Previsão: O perdedor provável é {loser.get_player_name()}'
+        )
 
     def handle_battle(self, province, army):
         if self.is_battle_ongoing(province):

@@ -112,3 +112,24 @@ class Province:
 
     def province_situation(self):
         return f"Província: {self.name}, Terreno: {self.terrain_type.get_terrain_name()}. (Nível: {self.level}) Vizinhos: {', '.join(neighbor.get_name() for neighbor in self.neighbor_provinces)}. {'(Em Batalha)' if self.in_battle else ''}{'(Domínio por: ' + str(self.dom_turns) + ' turnos)' if self.dom_turns > 0 else ''}"
+
+    def obtain_province_stats(self) -> dict:
+        stats = {
+            "Name": self.name,
+            "Owner": self.current_owner.get_player_name(),
+            "Terrain": self.terrain_type.get_terrain_name(),
+            "Level": self.level,
+            "Level Cap": self.level_cap,
+            "Move Requirement": self.move_req,
+            "In Battle": self.in_battle,
+            "Domination Turns": self.dom_turns,
+            "Army Progress": self.army_progress,
+            "Neighbors": [neighbor.get_name() for neighbor in self.neighbor_provinces]
+        }
+        return stats
+
+    def obtain_province_battle_stats(self) -> str:
+        terrain_modifier = self.terrain_type.get_defence_modifier()
+        defence_modifier = self.get_defence_modifier()
+        level = self.level
+        return [terrain_modifier, defence_modifier, level]

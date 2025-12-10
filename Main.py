@@ -170,7 +170,7 @@ class Main:
         game.start()
 
         battle_control.handle_battle(self.viena, player1.armys[0])
-        map_battles.get_no_fog_battles()
+        map_battles.display_battle_map()
         # Play game
         game.play()
 

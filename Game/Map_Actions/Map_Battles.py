@@ -1,104 +1,169 @@
+from rich.columns import Columns
+from rich.panel import Panel
 from rich.table import Table
 
 from Configs.Console import ConsoleClass
 from Game.Battle_Control.Battle_Control import BattleControl
+from Province import Province
 
 
 class Map_Battles:
     def __init__(self, battle_control: BattleControl):
         self.console = ConsoleClass.get_console()
         self.battle_control = battle_control
+        self.no_fog_battles_info = battle_control.ongoing_battles
 
-    def __get_no_fog_battles(self):
-        battles_info = {}
-        for idx, (province, battle) in enumerate(self.battle_control.ongoing_battles.items(), start=1):
-            battles_info[idx] = (
-                province.get_name(),
-                (", ".join(neighbor.get_name()
-                 for neighbor in province.get_neighbors())),
-                province.obtain_province_battle_stats(),
-                battle.get_off_army_owner().get_player_name(),
-                battle.get_def_army_owner().get_player_name(),
-                battle.total_off_army(),
-                battle.total_def_army(),
-                battle.get_off_actual_health(),
-                battle.get_def_actual_health(),
-                battle.get_last_off_damage(),
-                battle.get_last_def_damage(),
-                battle.get_turns_count(),
-                battle.get_epic_turns(),
-            )
-        return (battles_info)
+    def __create_army_token(self, army, index: int, border_color: str) -> Panel:
+        is_group = hasattr(army, "armys") and army.get_army_quant() > 1
+        label = "Grupo" if is_group else "Exército"
+        size_info = f"Qtd: {army.get_army_quant()}" if is_group else None
+        token_lines = [
+            *([size_info] if size_info else []),
+            f"Ataque: {army.get_attack():.2f}",
+            f"Defesa: {army.get_defense():.2f}",
+            f"Vida: {army.get_health():.2f}",
+        ]
+        return Panel(
+            "\n".join(token_lines),
+            title=f"{label} #{index}",
+            border_style=border_color,
+            padding=(0, 1),
+            expand=False,
+        )
 
-    def __build_battle_info(self, fog_of_war: bool, battle_id: str):
-        if fog_of_war:
+    def __build_army_tokens(self, armies, color: str):
+        if not armies:
+            return [
+                Panel(
+                    "Sem exércitos ativos",
+                    border_style=color,
+                    padding=(0, 1),
+                    expand=False,
+                )
+            ]
+        return [
+            self.__create_army_token(army, index, color)
+            for index, army in enumerate(armies, start=1)
+        ]
+
+    def __build_army_map(self, battle):
+        army_map = Table(title="Mapa da Batalha", show_lines=True, width=100)
+        army_map.add_column("Atacantes", justify="center")
+        army_map.add_column("Defensores", justify="center")
+
+        attacker_tokens = Columns(
+            self.__build_army_tokens(battle.get_off_army(), "green"),
+            expand=True,
+            equal=True,
+        )
+        defender_tokens = Columns(
+            self.__build_army_tokens(battle.get_def_army(), "red"),
+            expand=True,
+            equal=True,
+        )
+
+        army_map.add_row(attacker_tokens, defender_tokens)
+        return army_map
+
+    def __build_battle_info(self, fog_of_war: bool, province: Province, battle):
+        if fog_of_war or battle is None:
             return
 
-        battle_data = self.no_fog_battles_info[battle_id]
-        battle_province = battle_data[0]
-        battle_neighbors = battle_data[1]
-        battle_province_stats = battle_data[2]
-        battle_off_player = battle_data[3]
-        battle_def_player = battle_data[4]
-        battle_off_army_size = battle_data[5]
-        battle_def_army_size = battle_data[6]
-        battle_off_health = battle_data[7]
-        battle_def_health = battle_data[8]
-        battle_off_last_damage = battle_data[9]
-        battle_def_last_damage = battle_data[10]
-        battle_turns = battle_data[11]
-        battle_epic_turns = battle_data[12]
+        battle_neighbors = ", ".join(
+            neighbor.get_name() for neighbor in province.get_neighbors()
+        ) or "Sem vizinhos"
+        battle_province_stats = province.obtain_province_battle_stats()
+        battle_off_player = battle.get_off_army_owner().get_player_name()
+        battle_def_player = battle.get_def_army_owner().get_player_name()
+        battle_off_army_size = battle.total_off_army()
+        battle_def_army_size = battle.total_def_army()
+        battle_off_health = battle.get_off_actual_health()
+        battle_def_health = battle.get_def_actual_health()
+        battle_off_last_damage = battle.get_last_off_damage()
+        battle_def_last_damage = battle.get_last_def_damage()
+        battle_turns = battle.get_turns_count()
+        battle_epic_turns = battle.get_epic_turns()
+        epic_turns_left = battle_epic_turns - battle_turns
+        epic_status = str(epic_turns_left) if epic_turns_left > 0 else "ÉPICA!"
         battle_predicted_winner = self.battle_control.predict_battle_winner(
-            battle_province)
+            province
+        )
+        battle_map = self.__build_army_map(battle)
+        battle_province_name = province.get_name()
 
         main_table = Table(title="Visão Geral", show_lines=True)
-        local_table = Table(title="Informações da Província",
-                            show_lines=True, width=100)
-        stats_table = Table(title="Informações da Batalha",
-                            show_lines=True, width=100)
+        local_table = Table(
+            title="Informações da Província", show_lines=True, width=100
+        )
+        stats_table = Table(
+            title="Informações da Batalha", show_lines=True, width=100
+        )
 
-        local_table.add_column("Campo", style="bold magenta",
-                               justify="center")
+        local_table.add_column("Campo", style="bold magenta", justify="center")
         local_table.add_column(
             "Detalhes", style="bold white", justify="center")
 
-        local_table.add_row("Província em Batalha", battle_province)
-        local_table.add_row("Modificadores",
-                            f'Terreno: {(battle_province_stats[0]) * 100}%, Defesa: {(battle_province_stats[1]) * 100}%, Level: {battle_province_stats[2]}')
-        local_table.add_row("Vizinhos", battle_neighbors)
+        province_rows = (
+            ("Província em Batalha", battle_province_name),
+            (
+                "Modificadores",
+                f"Terreno: {battle_province_stats[0] * 100}%, "
+                f"Defesa: {battle_province_stats[1] * 100}%, "
+                f"Level: {battle_province_stats[2]}",
+            ),
+            ("Vizinhos", battle_neighbors),
+        )
+        for row in province_rows:
+            local_table.add_row(*row)
 
         stats_table.add_column("Campo", style="bold cyan", justify="center")
         stats_table.add_column("Atacante", style="green", justify="center")
         stats_table.add_column("Defensor", style="red", justify="center")
 
-        stats_table.add_row("Jogador", battle_off_player, battle_def_player)
-        stats_table.add_row("Qtd. Exércitos", str(
-            battle_off_army_size), str(battle_def_army_size))
-        stats_table.add_row("Vida Atual", str(
-            battle_off_health), str(battle_def_health))
-        stats_table.add_row("Último Dano", str(
-            battle_off_last_damage), str(battle_def_last_damage))
-        stats_table.add_row("Turnos Decorridos", str(
-            battle_turns), str(battle_turns))
-        stats_table.add_row("Turnos Épicos", str(battle_epic_turns -
-                                                 battle_turns if battle_epic_turns > battle_turns else 'ÉPICA!'), str(battle_epic_turns - battle_turns if battle_epic_turns > battle_turns else 'ÉPICA!'))
-        stats_table.add_row("Vencedor Previsto",
-                            battle_predicted_winner[0], battle_predicted_winner[1])
+        stats_rows = (
+            ("Jogador", battle_off_player, battle_def_player),
+            ("Qtd. Exércitos", str(battle_off_army_size), str(battle_def_army_size)),
+            ("Vida Atual", str(battle_off_health), str(battle_def_health)),
+            (
+                "Último Dano",
+                str(battle_off_last_damage),
+                str(battle_def_last_damage),
+            ),
+            ("Turnos Decorridos", str(battle_turns), str(battle_turns)),
+            ("Épica em", epic_status, epic_status),
+            (
+                "Vencedor Previsto",
+                battle_predicted_winner[0],
+                battle_predicted_winner[1],
+            ),
+        )
+        for row in stats_rows:
+            stats_table.add_row(*row)
 
         main_table.add_column(
-            f"A Batalha de {battle_province}", style="bold yellow", justify="center", no_wrap=True)
+            f"A Batalha de {battle_province_name}",
+            style="bold yellow",
+            justify="center",
+            no_wrap=True,
+        )
         main_table.add_row(local_table)
         main_table.add_row(stats_table)
+        main_table.add_row(battle_map)
         return main_table
 
+    def __refresh_no_fog_battles(self):
+        self.no_fog_battles_info = self.battle_control.ongoing_battles
+
     def display_battle_map(self):
-        self.no_fog_battles_info = self.__get_no_fog_battles()
+        self.__refresh_no_fog_battles()
 
         if not self.no_fog_battles_info:
             self.console.print("Nenhuma batalha em andamento no mapa.")
             return
 
-        for battle_id in self.no_fog_battles_info:
+        for province, battle in self.no_fog_battles_info.items():
             main_table = self.__build_battle_info(
-                fog_of_war=False, battle_id=battle_id)
-            self.console.print(main_table)
+                fog_of_war=False, province=province, battle=battle
+            )
+            if main_table:
+                self.console.print(main_table)

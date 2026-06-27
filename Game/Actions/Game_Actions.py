@@ -2,6 +2,7 @@ from Player import Player
 from Game.Game_State import Game_State
 from Game.Actions.Game_Actions_Army_Actions import ArmyActions
 from Game.Actions.Game_Actions_Upgrade_Province import Upgrade_Province
+from Game.Map_Actions.Map_Error import MapError
 
 
 class Game_Action:
@@ -11,9 +12,13 @@ class Game_Action:
         self.upgrade_province = Upgrade_Province()
 
     def action(self, player: Player, action: str):
-        if action == "1":
-            self.army_actions.army_action(player)
-        elif action == "2":
-            self.upgrade_province.upgrade_province(player)
-        elif action == "0":
-            self.game_state.player_skip = True
+        try:
+            if action == "1":
+                self.army_actions.army_action(player)
+            elif action == "2":
+                self.upgrade_province.upgrade_province(player)
+            elif action == "0":
+                self.game_state.player_skip = True
+
+        except MapError:
+            pass

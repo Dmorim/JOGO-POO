@@ -1,12 +1,11 @@
 from Player import Player
-from Game.Game_State import Game_State
 from Game.Executions.Move_Execution import Movement
 from Game.Executions.Army_Execution import Army_Execution
+from Game.Map_Actions.Map_Error import MapError
 
 
 class ArmyActions:
     def __init__(self):
-        self.game_state = Game_State()
         self.army_movement = Movement()
         self.army_execution = Army_Execution()
 
@@ -101,15 +100,13 @@ class ArmyActions:
 
     def army_action(self, player):
         if player.no_battle_armies() == []:
-            print("Não há exércitos disponíveis.")
-            return False
+            raise MapError("Não há exércitos disponíveis para realizar ações.")
 
         print("Exércitos disponíveis: ")
 
         selected_army_index = self.__selected_army_verification(player)
         if selected_army_index == 0:
-            self.game_state.mapmode = False
-            return False
+            raise MapError("Nenhum exército selecionado.")
         selected_army = player.no_battle_armies()[selected_army_index - 1]
         print(self.__show_neighbors(selected_army))
 

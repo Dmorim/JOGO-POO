@@ -34,20 +34,6 @@ class GameMap:
         else:
             return Style(color="bright_blue")
 
-    def __print_player_battle(self, player):
-        self.console.print(
-            f"{'='*25}\nBatalhas em andamento:\n{'='*25}", style="bold red")
-        for i, battle in enumerate(self.battle_control.ongoing_battles):
-            self.console.print(
-                f"\nBatalha {i+1} - {battle.battle_situation()}", style="bold yellow")
-            self.console.print(f"{'='*78}")
-            self.console.print(battle.get_last_off_damage(),
-                               style="bold magenta")
-            self.console.print(
-                f"{battle.get_last_def_damage()}\n", style="bold magenta")
-            if self.battle_control.ongoing_battles.index(battle) != len(self.battle_control.ongoing_battles) - 1:
-                self.console.print(f"{'='*78}\n")
-
     def __print_current_player(self, title_style, player):
         self.console.print(
             Panel.fit(

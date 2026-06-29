@@ -1,11 +1,10 @@
 from Player import Player
-from Game.Game_State import Game_State
 from Game.Executions.Province_Execution import Province_Execution
+from Game.Map_Actions.Map_Error import MapError
 
 
 class Upgrade_Province:
     def __init__(self):
-        self.game_state = Game_State()
         self.province_execution = Province_Execution()
 
     def __show_available_province(self, player: Player):
@@ -30,7 +29,6 @@ class Upgrade_Province:
         print('Províncias disponíveis para melhoria:')
         province_index = self.__selected_province_verification(player)
         if province_index == 0:
-            self.game_state.mapmode = False
-            return
+            raise MapError("Nenhuma província selecionada.")
         self.province_execution.upgrade_province(
             player, player.province_available_to_upgrade()[province_index - 1])

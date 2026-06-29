@@ -157,12 +157,7 @@ class Main:
                 america_add_provinces(player)
 
         add_neighbors()
-        for i in range(6):
-            player1.army_creation(player1.provinces[0])
 
-        battle_control.handle_battle(self.viena, player1.armys[0])
-        map_battles.display_battle_map()
-        # Start game
         game.start()
         # Play game
         game.play()

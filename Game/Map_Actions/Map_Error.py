@@ -1,3 +1,3 @@
-class MapError:
-    def __init__(self):
-        pass
+class MapError(Exception):
+    def __init__(self, message):
+        self.message = message

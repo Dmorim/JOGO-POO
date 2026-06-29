@@ -154,16 +154,51 @@ class Map_Battles:
     def __refresh_no_fog_battles(self):
         self.no_fog_battles_info = self.battle_control.ongoing_battles
 
-    def display_battle_map(self):
+    def display_battle_map(self, province_filter=None):
+        """
+        Se province_filter for None: exibe todas as batalhas (comportamento atual).
+        Se for uma string: busca por nome da província (case-insensitive).
+        Se for um objeto Province: compara pelo nome/identidade.
+        """
         self.__refresh_no_fog_battles()
 
         if not self.no_fog_battles_info:
             self.console.print("Nenhuma batalha em andamento no mapa.")
             return
 
+        # Quando for solicitado filtrar por uma província específica
+        if province_filter is not None:
+            target_province = None
+            target_battle = None
+            for province, battle in self.no_fog_battles_info.items():
+                if isinstance(province_filter, Province):
+                    match = province is province_filter or province.get_name() == province_filter.get_name()
+                else:
+                    # tratar como nome (string)
+                    try:
+                        match = province.get_name().strip().lower() == str(
+                            province_filter).strip().lower()
+                    except Exception:
+                        match = False
+                if match:
+                    target_province = province
+                    target_battle = battle
+                    break
+
+            if target_battle is None:
+                self.console.print(
+                    f"Nenhuma batalha encontrada para a província '{province_filter}'.")
+                return
+
+            main_table = self.__build_battle_info(
+                fog_of_war=False, province=target_province, battle=target_battle)
+            if main_table:
+                self.console.print(main_table)
+            return
+
+        # Sem filtro: comportamento original — exibir todas as batalhas
         for province, battle in self.no_fog_battles_info.items():
             main_table = self.__build_battle_info(
-                fog_of_war=False, province=province, battle=battle
-            )
+                fog_of_war=False, province=province, battle=battle)
             if main_table:
                 self.console.print(main_table)

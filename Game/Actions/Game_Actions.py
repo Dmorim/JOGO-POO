@@ -2,6 +2,7 @@ from Player import Player
 from Game.Game_State import Game_State
 from Game.Actions.Game_Actions_Army_Actions import ArmyActions
 from Game.Actions.Game_Actions_Upgrade_Province import Upgrade_Province
+from Game.Map_Actions.Map_Utils import map_mensage
 from Game.Map_Actions.Map_Error import MapError
 
 
@@ -20,5 +21,7 @@ class Game_Action:
             elif action == "0":
                 self.game_state.player_skip = True
 
-        except MapError:
+        except MapError as e:
+            self.game_state.mapmode = False
+            map_mensage(f"{e.message} Retornando ao menu...", color="red")
             pass
